@@ -67,37 +67,3 @@ def rounding(med, std):
     med_round = int(round(med / 10 ** dim, prec) * 10 ** dim)
     std_round = int(round(std / 10 ** prec, 1) * 10 ** prec)
     return med_round, std_round
-
-
-"""    def end_epidemic(self, param, threshold=1000):
-        y = globals()['y']
-        tmax = globals()['tmax']
-        k, j = param
-        return np.argmax(y[tmax:, j, k] < np.log(threshold)) + tmax
-
-    def end_epidemic_plot2(self):
-        y = self.samples['y']
-        tmax = self.data['tmax'] - 1
-
-        nchains = y.shape[2]
-        niters = y.shape[1]
-        paramlist = list(it.product(range(nchains), range(niters)))
-
-        # Compute times until the number of confirmed cases falls below 1000 for the first time
-        p = Pool(cpu_count() - 1)
-        times = np.asarray(p.map(self.end_epidemic, paramlist))
-        p.close()
-        # Remove times corresponding at not satisfied condition (first time < 1000)
-        times = times[times != tmax]
-
-        # print(np.median(times), np.std(times))
-        med, std = rounding(np.median(times), np.std(times))
-        # plot distribution of times
-        sns.histplot(times, binwidth=10, color='b', stat='density')
-        textstr = f'({med:d}' + r' $\pm$ ' + f'{std:d}) days'
-        ax = plt.gca()
-        ax.axvline(np.median(times), c='r', label=textstr)
-        plt.legend()
-        plt.grid()
-        plt.xlabel('Days since first confirmed case')
-        plt.ylabel('Distribution of confirmed < 1000')"""
