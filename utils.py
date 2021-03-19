@@ -13,25 +13,22 @@ def func_np(beta, rmu, p, q):
 
 @jit('void(double[:], double[:], double[:], double[:], double[:])',
      nopython=True, nogil=True)
-def inner_func_nb(result, beta, rmu, p, q):
+def peak_time_nb(result, beta, rmu, p, q):
     """
     Function under test.
     """
     for i in range(len(result)):
         result[i] = 1 / (p[i] + q[i]) * math.log(beta[i] * q[i] / (rmu[i] * (p[i] + q[i]) - beta[i] * p[i]))
 
-
 def make_singlethread(inner_func):
     """
     Run the given function inside a single thread.
     """
-
     def func(*args):
         length = len(args[0])
         result = np.empty(length, dtype=np.float64)
         inner_func(result, *args)
         return result
-
     return func
 
 
@@ -40,7 +37,6 @@ def make_multithread(inner_func, numthreads):
     Run the given function inside *numthreads* threads, splitting
     its arguments into equal-sized chunks.
     """
-
     def func_mt(*args):
         length = len(args[0])
         result = np.empty(length, dtype=np.float64)
@@ -57,9 +53,7 @@ def make_multithread(inner_func, numthreads):
         for thread in threads:
             thread.join()
         return result
-
     return func_mt
-
 
 def rounding(med, std):
     dim = len(str(int(med)))
@@ -67,3 +61,16 @@ def rounding(med, std):
     med_round = int(round(med / 10 ** dim, prec) * 10 ** dim)
     std_round = int(round(std / 10 ** prec, 1) * 10 ** prec)
     return med_round, std_round
+
+# The SCIR model differential equations
+def SCIR(state, t, N, beta, q, p, rmu):
+    """
+    return: dSdt, dCdt, dIdt, dXdt (Derivatives)
+    """
+    # Unpack the state vector
+    S, C, I, X = state
+    return (-beta / N * I * S - q * S + p * C,
+            q * S - p * C,
+            beta / N * I * S - rmu * I,
+            rmu * I)
+
