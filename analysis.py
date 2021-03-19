@@ -24,49 +24,6 @@ from scipy.integrate import odeint
 from datetime import datetime as dt
 
 
-jags_model = '''
-model {
-    # Regression before any confinement measure (populations are in log scale)
-    for(t in (t0 + 1):(tq)) {
-        I[t] ~ dnorm(I0 + (beta - rmu) * (t - t0), tauI) # Active cases
-        y[t] ~ dnorm(I0 + (beta - rmu) * (t - t0), tauI) # Posterior predictive
-    }
-
-    # Regression for active cases post-confinement (populations are in log scale)
-    for(t in (tq + 1):tmax) {
-        I[t] ~ dnorm(Iq + ((beta * q) / (p + q)^2 * (1 - exp(-(p + q) * (t - tq))) +
-                    (beta - rmu - beta * q / (q + p))*(t - tq)), tauI)
-    }
-
-    # Posterior predictive for active cases post-confinement (extended until tf)
-    for(t in (tq + 1):tf) {
-        y[t] ~ dnorm(y[tq] + ((beta * q)/(p + q)^2 * (1 - exp(-(p + q) * (t - tq))) +
-                    (beta - rmu - beta * q / (q + p)) * (t - tq)), tauI)
-    }
-
-    # Regression for new death+recovered cases
-    for(t in (tX0):tmax) {
-        X[t] ~ dnorm(log(rmu) + I[t], tauX)  # New Deaths + Recovered
-    }
-
-    # Posterior predictive for new deaths+recovered (extended until tf)
-    for(t in tX0:tf) {
-        z[t] ~ dnorm(log(rmu) + y[t], tauX)
-    }
-
-    # Priors for parameters
-    p ~ dunif(p0, p1)  # Non-informative prior
-    q ~ dunif(q0, q1)  # Non-informative prior
-    beta ~ dunif(b0, b1)  # Doubling time is less than 1 per day (informative prior)
-    rmu ~ dunif(r0, r1)  # rmu is lower than beta (so R0>1) (informative prior)
-
-    # Priors for precisions (inverse of variance)
-    tauI ~ dgamma(tauI0, tauI1)  # Non-informative prior
-    tauX ~ dgamma(tauX0, tauX1)  # Non-informative prior
-    y[t0] <- I0
-}'''
-
-
 class Analysis:
 
     def __init__(self, date, confirmed, recovered_death, quarantine, last_data,
@@ -122,6 +79,7 @@ class Analysis:
         self.data_processing()
 
         # Construct JAGS Model
+        jags_model = open('model', 'r').read()
         model = pj.Model(code=jags_model,
                          data=self.data,
                          chains=nchains,
@@ -257,3 +215,13 @@ class Analysis:
     def plot_summary(self):
         plot_summary(self)
 
+##' Save class object (Italy)
+# file_ita = open('results_ita.obj', 'wb')
+# pickle.dump(analysis_ita, file_ita)
+# file_ita.close()
+## Load class object (Italy)
+# filehandler_ita = open('results_ita.pickle', 'rb')
+# object_ita = pickle.load(filehandler_ita)
+## Check if two dict samples are the same (print elements different)
+# {k: object_try.samples[k] for k in object_try.samples if k in analysis_ita.samples and
+# np.all(object_try.samples[k] != analysis_ita.samples[k])}
