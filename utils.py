@@ -31,7 +31,6 @@ def make_singlethread(inner_func):
         return result
     return func
 
-
 def make_multithread(inner_func, numthreads):
     """
     Run the given function inside *numthreads* threads, splitting
