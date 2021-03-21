@@ -10,7 +10,6 @@ def func_np(beta, rmu, p, q):
     """
     return 1 / (p + q) * np.log(beta * q / (rmu * (p + q) - beta * p))
 
-
 @jit('void(double[:], double[:], double[:], double[:], double[:])',
      nopython=True, nogil=True)
 def peak_time_nb(result, beta, rmu, p, q):
