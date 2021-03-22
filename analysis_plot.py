@@ -98,7 +98,6 @@ def autocorr_fit_plot(self, xmin=-10, xmax=200, var=None):
             ax.set_xlim(xmin, xmax)
             ax.set_title(f'Autocorrelation fit for {self.names[ind]} of Chain {j + 1}', weight='bold')
 
-
 def peak_posterior(self, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False):
     data = self.traces.to_numpy()
     t0 = self.data['t0'] - 1
@@ -148,8 +147,7 @@ def peak_posterior(self, nthreads=cpu_count() - 2, binwidth=10, offset=3, second
     # Add peak times series to Analysis attribute
     self.t_peak = t_peak
 
-
-def end_epidemic_plot(self, tf=380, threshold=1000):
+def end_epidemic_plot(self, tf=380, threshold=1000.):
     tq = self.data['tq'] - 1
     tmax = self.data['tmax'] - 1
     Iq = self.data['Iq']
@@ -165,18 +163,18 @@ def end_epidemic_plot(self, tf=380, threshold=1000):
     q = q[mask]
 
     t = np.array([np.arange(tmax, tf)] * len(beta)).T
-    # Use numba and parallelize in I
     I = Iq + ((beta * q) / (p + q) ** 2 * (1 - np.exp(-(p + q) * (t - tq))) +
               (beta - rmu - beta * q / (q + p)) * (t - tq))
-    # Compute times until the number of confirmed cases falls below 1000 for the first time
+    # Compute times until the number of confirmed cases falls below threshold for the first time
+    # Numba function
+
     length = I.shape[1]
     times = np.empty(length, dtype=np.float64)
-    # Maybe improve this loop with multiprocessing
-    for i in range(length):
-        times[i] = np.argmax(I[:, i] < np.log(threshold)) + tmax
-
+    # Numba function
+    epidemic_end(times, I, threshold, float(tmax))
     # Remove times corresponding at not satisfied condition (first time < threshold)
     times = times[times != tmax]
+
     # print(np.median(times), np.std(times))
     med, std = rounding(np.median(times), np.std(times))
     # plot distribution of times
@@ -313,7 +311,6 @@ def trace_plot(self, var=None):
         fig.suptitle(f'Trace of {self.names[ind]}', fontsize=16, fontweight='bold')
         plt.show()
 
-
 def posteriors(self, var=None):
     ind = np.where(self.varname == var)[0][0]
     exp = 1
@@ -353,7 +350,6 @@ def posteriors(self, var=None):
         fig.suptitle(f'Posterior distributions of {self.names[ind]}', fontsize=16, fontweight='bold')
         plt.show()
 
-
 def plot_summary(self):
     """
     Plot of trace, posterior, acf, for all parameters and chains
@@ -382,4 +378,3 @@ def plot_summary(self):
             ax[i, k].set_xlabel('MCMC step')
             ax[i, k].set_title(titles[k], weight='bold')
             ax[i, k].grid()
-
