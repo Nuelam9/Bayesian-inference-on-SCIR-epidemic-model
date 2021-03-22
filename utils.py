@@ -19,6 +19,15 @@ def peak_time_nb(result, beta, rmu, p, q):
     for i in range(len(result)):
         result[i] = 1 / (p[i] + q[i]) * math.log(beta[i] * q[i] / (rmu[i] * (p[i] + q[i]) - beta[i] * p[i]))
 
+@jit('void(double[:], double[:,:], double, double)',
+      nopython=True, nogil=True)
+def epidemic_end(times, I, threshold, tmax):
+    """
+    Function under test.
+    """
+    for i in range(len(times)):
+        times[i] = np.argmax(I[:, i] < np.log(threshold)) + tmax
+
 def make_singlethread(inner_func):
     """
     Run the given function inside a single thread.
@@ -71,4 +80,3 @@ def SCIR(state, t, N, beta, q, p, rmu):
             q * S - p * C,
             beta / N * I * S - rmu * I,
             rmu * I)
-

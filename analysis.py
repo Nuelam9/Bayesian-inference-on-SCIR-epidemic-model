@@ -200,7 +200,7 @@ class Analysis:
     def peak_posterior(self, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False):
         peak_posterior(self, nthreads, binwidth, offset, second_wave)
 
-    def end_epidemic_plot(self, tf=380, threshold=1000):
+    def end_epidemic_plo(self, tf=380, threshold=1000.):
         end_epidemic_plot(self, tf, threshold)
 
     def plot_results(self, CI=95, Y=False, Z=False, observed=False):
