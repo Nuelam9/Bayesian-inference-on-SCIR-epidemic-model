@@ -10,6 +10,10 @@ def func_np(beta, rmu, p, q):
     """
     return 1 / (p + q) * np.log(beta * q / (rmu * (p + q) - beta * p))
 
+
+# nopython: (compilation mode) compile the decorated function so that it will run 
+# entirely without the involvement of the Python interpreter (best performance)
+# nogil: release GIL (global interpreter lock) allowing you to take advantage of multi-core systems
 @jit('void(double[:], double[:], double[:], double[:], double[:])',
      nopython=True, nogil=True)
 def peak_time_nb(result, beta, rmu, p, q):
