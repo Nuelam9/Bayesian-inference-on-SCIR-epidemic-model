@@ -13,7 +13,7 @@ import itertools as it
 from statsmodels.tsa.stattools import acf
 from scipy.optimize import curve_fit
 from scipy.integrate import odeint
-from datetime import datetime as dt # in end_epidemic
+from datetime import datetime as dt  # in end_epidemic
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -45,20 +45,23 @@ cmap = mcolors.ListedColormap(cmap_big(np.linspace(0.7, 0.95, 256)))
 bbox_props = dict(boxstyle="round,pad=0.3", fc=colors[0], alpha=.5)
 
 
-def trim_axs(axs, N):
+def trim_axs(axs, n):
     axs = axs.flat
-    for ax in axs[N:]:
+    for ax in axs[n:]:
         ax.remove()
-    return axs[:N]
+    return axs[:n]
+
 
 def autocorrelation_time_plot(self):
     self.times = self.autocorrelation_time()
 
-    fig, ax = plt.subplots(len(self.names), figsize=(10, 10), constrained_layout=True)
-    for i in range(len(self.names)):
+    n = len(self.names)
+    fig, ax = plt.subplots(n, figsize=(10, 10), constrained_layout=True)
+    for i in range(n):
         ax[i].plot(self.times[:, i], '-ob')
         ax[i].set_title(f'Autocorrelation time for {self.names[i]}', weight='bold')
         ax[i].grid()
+
 
 def autocorr_fit_plot(self, xmin=-10, xmax=200, var=None):
     # Acf fit plot of all variables and chains
@@ -97,6 +100,7 @@ def autocorr_fit_plot(self, xmin=-10, xmax=200, var=None):
             ax.legend()
             ax.set_xlim(xmin, xmax)
             ax.set_title(f'Autocorrelation fit for {self.names[ind]} of Chain {j + 1}', weight='bold')
+
 
 def peak_posterior(self, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False):
     data = self.traces.to_numpy()
@@ -147,9 +151,12 @@ def peak_posterior(self, nthreads=cpu_count() - 2, binwidth=10, offset=3, second
     # Add peak times series to Analysis attribute
     self.t_peak = t_peak
 
-def end_epidemic_plot(self, tf=380, threshold=1000.):
+
+def end_epidemic_plot(self, tf, threshold=1000.):
     tq = self.data['tq'] - 1
     tmax = self.data['tmax'] - 1
+    fmt = '%Y.%m.%d'
+    tf = (dt.strptime(tf, fmt) - dt.strptime(self.date[0], fmt)).days
     Iq = self.data['Iq']
     beta = self.samples['beta']
     rmu = self.samples['rmu']
@@ -185,14 +192,15 @@ def end_epidemic_plot(self, tf=380, threshold=1000.):
     plt.legend()
     plt.grid()
     plt.xlabel('Days since first confirmed case')
-    plt.ylabel(f'Distribution of confirmed < {threshold}')
+    plt.ylabel(f'Distribution of confirmed < {int(threshold)}')
 
-def plot_results(self, CI=95, Y=False, Z=False, observed=False):
+
+def plot_results(self, ci=95, Y=False, Z=False, observed=False):
     t0 = self.data['t0'] - 1
     tmax = self.data['tmax'] - 1
     tX0 = self.data['tX0'] - 1
     tf = self.data['tf']
-    I_exact = self.infected_exact() / np.log(10)
+    I_exact = self.infected_exact / np.log(10)
     _, b, c = self.samples['y'].shape
 
     fig, ax = plt.subplots(figsize=(16, 8))
@@ -203,14 +211,14 @@ def plot_results(self, CI=95, Y=False, Z=False, observed=False):
     if Y:
         I = self.data["I"] / np.log(10)
         y = self.samples["y"].reshape(tf, b * c)
-        y1 = np.percentile(y, (100 + CI) / 2, axis=1) / np.log(10)
-        y2 = np.percentile(y, (100 - CI) / 2, axis=1) / np.log(10)
+        y1 = np.percentile(y, (100 + ci) / 2, axis=1) / np.log(10)
+        y2 = np.percentile(y, (100 - ci) / 2, axis=1) / np.log(10)
 
         t = np.arange(t0, tmax) - t0
         plt.scatter(t, I[t0:tmax], fc='w', ec='k', label='Fitted data')
         plt.plot(I_exact, c='orange', label='Fit+prediction')
         t = np.arange(t0, tf) - t0
-        plt.fill_between(t, y1[t0:tf], y2[t0:tf], alpha=0.3, color='orange', label=f'{CI}% CI')
+        plt.fill_between(t, y1[t0:tf], y2[t0:tf], alpha=0.3, color='orange', label=f'{ci}% CI')
 
         if observed:
             # prevision beyond dataset's time
@@ -243,8 +251,8 @@ def plot_results(self, CI=95, Y=False, Z=False, observed=False):
         elif type(self.samples["z"]) == np.ndarray:
             z = self.samples["z"].reshape(tf, b * c)
 
-        z1 = np.percentile(z, (100 + CI) / 2, axis=1) / np.log(10)
-        z2 = np.percentile(z, (100 - CI) / 2, axis=1) / np.log(10)
+        z1 = np.percentile(z, (100 + ci) / 2, axis=1) / np.log(10)
+        z2 = np.percentile(z, (100 - ci) / 2, axis=1) / np.log(10)
         z_med = np.median(z, axis=1) / np.log(10)
 
         t = np.arange(tX0, tf) - tX0
@@ -252,7 +260,7 @@ def plot_results(self, CI=95, Y=False, Z=False, observed=False):
         t = np.arange(tX0, tmax) - tX0
         plt.scatter(t, X[tX0:tmax], fc='w', ec='k', label='Fitted data')
         t = np.arange(tX0, tf) - tX0
-        plt.fill_between(t, z1[tX0:tf], z2[tX0:tf], alpha=0.3, color='orange', label=f'{CI}% CI')
+        plt.fill_between(t, z1[tX0:tf], z2[tX0:tf], alpha=0.3, color='orange', label=f'{ci}% CI')
 
         if observed:
             if tf > len(X):
@@ -273,6 +281,7 @@ def plot_results(self, CI=95, Y=False, Z=False, observed=False):
         plt.legend(loc='upper left')
         plt.title("Daily variation of death+recovered cases %s" % self.country, fontsize=16, fontweight='bold')
         plt.legend(loc='upper left')
+
 
 def trace_plot(self, var=None):
     ind = np.where(self.varname == var)[0][0]
@@ -310,6 +319,7 @@ def trace_plot(self, var=None):
             ax.set_title(f"Chain {(i + 1):d}", fontweight='bold')
         fig.suptitle(f'Trace of {self.names[ind]}', fontsize=16, fontweight='bold')
         plt.show()
+
 
 def posteriors(self, var=None):
     ind = np.where(self.varname == var)[0][0]
@@ -350,26 +360,26 @@ def posteriors(self, var=None):
         fig.suptitle(f'Posterior distributions of {self.names[ind]}', fontsize=16, fontweight='bold')
         plt.show()
 
+
 def plot_summary(self):
     """
     Plot of trace, posterior, acf, for all parameters and chains
     """
     fig, ax = plt.subplots(6, 3, figsize=(15, 12), constrained_layout=True)
-    sample_size = self.samples['beta'].shape[1]
-
+    sample_size = int(self.niter * self.burn_in)
     for i in range(len(self.varname)):
         exp = 1
         if (self.varname[i] == 'tauI') | (self.varname[i] == 'tauX'):
             exp = - 1 / 2
         for j in range(self.nchains):
-            variable_chain = np.power(self.samples[self.varname[i]][0, :, j], exp)
-            variable_chains = np.power(self.samples[self.varname[i]].ravel(), exp)
-            ax[i, 0].plot(variable_chain, label=f'Chain {j + 1}', lw=1)
-            sns.distplot(variable_chain, hist=False, kde=True, ax=ax[i, 1])
-            ax[i, 2].plot(acf(variable_chain, fft=True, nlags=100))
+            var_chain = np.power(self.samples[self.varname[i]][0, :, j], exp)
+            var_chains = np.power(self.samples[self.varname[i]].ravel(), exp)
+            ax[i, 0].plot(var_chain, label=f'Chain {j + 1}', lw=1)
+            sns.distplot(var_chain, hist=False, kde=True, ax=ax[i, 1])
+            ax[i, 2].plot(acf(var_chain, fft=True, nlags=100))
 
-        ax[i, 0].plot([np.median(variable_chains)] * sample_size, c='r', lw=2, label='Median')
-        ax[i, 1].axvline(np.median(variable_chains), color='r', lw=1, label='Actual epidemic peak')
+        ax[i, 0].plot([np.median(var_chains)] * sample_size, c='r', lw=2, label='Median')
+        ax[i, 1].axvline(np.median(var_chains), color='r', lw=1, label='Actual epidemic peak')
         ax[i, 1].set_ylabel('')
         ax[i, 2].set_xlabel('Lag')
         titles = [f'Trace of {self.names[i]}', f'Posterior distribution of {self.names[i]}',
