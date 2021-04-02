@@ -62,9 +62,9 @@ class Analysis:
         tX0 = (X > 0).argmax()  # First day with more than 1 new death or recovered
         tq = np.where(self.date == self.quarantine)[0][0]  # Begin quarantine
         tmax = np.where(self.date == self.last_data)[0][0]  # Last data-point used for estimation
-        FMT = '%Y.%m.%d'
-        tf = (dt.strptime(self.last_projection, FMT) - dt.strptime(self.date[0],
-                                                                   FMT)).days  # Last day to project the data
+        fmt = '%Y.%m.%d'
+        tf = (dt.strptime(self.last_projection, fmt) - dt.strptime(self.date[0],
+                                                                   fmt)).days  # Last day to project the data
         I0 = I[t0]  # First datum in the Active cases series
         Iq = I[tq]  # First datum after quarantine in the Active cases series
 
@@ -72,7 +72,7 @@ class Analysis:
         self.data = dict(b0=self.beta[0], b1=self.beta[1], r0=self.rmu[0], r1=self.rmu[1],
                          q0=self.q[0], q1=self.q[1], p0=self.p[0], p1=self.p[1],
                          tauI0=self.tauI[0], tauI1=self.tauI[1], tauX0=self.tauX[0], tauX1=self.tauX[1],
-                         I=I, X=X, I0=I0, Iq=Iq, t0=t0 + 1, tX0=tX0 + 1, tq=tq + 1, tmax=tmax + 1, tf=tf + 1)
+                         I=I, X=X, I0=I0, Iq=Iq, t0=t0 + 1, tX0=tX0 + 1, tq=tq + 1, tmax=tmax + 1, tf=tf + 1)       
 
     def sampler(self, nchains, nthreads, nchains_per_thread=1, niter=10000, nadapt=0, thin=1, burn_in=0.5):
         # Create data attribute
@@ -88,14 +88,16 @@ class Analysis:
                          chains_per_thread=nchains_per_thread
                          )
         # Create samples
-        samples = model.sample(niter, thin=thin, monitor_type="trace")
-        # Initial portion of a Markov chain that is not stationary and is still affected by its initial value
+        samples = model.sample(niter, vars=['beta', 'p', 'q', 'rmu', 'tauI', 'tauX', 'y', 'z'],
+                               thin=thin, monitor_type='trace')
+        # Discard initial portion of a Markov chain that is not stationary and is still affected by its initial value
         samples = pj.discard_burn_in_samples(samples, burn_in=round(burn_in * niter))
         self.niter = niter
         self.burn_in = burn_in
         self.nchains = nchains
         self.samples = samples
 
+    @property
     def summary(self):
         def median_sd(x):
             median = np.percentile(x, 50)
@@ -123,7 +125,7 @@ class Analysis:
         self.param = param
         return param[['median', 'sd', '2.5%_hdi', '97.5%_hdi', 'r_hat']]
 
-    # Here use numba
+    @property
     def infected_exact(self):
         I0 = self.data['I0']
         Iq = self.data['Iq']
@@ -172,7 +174,7 @@ class Analysis:
         # Contact rate (beta), mean recovery+death rate, rmu,
         # rate of specific measures restricting mobility and contacts (q),
         # rate of individuals that leave the confinement measure (p) (all in 1/days)
-        beta, rmu, q, p = self.summary().loc[['beta', 'rmu', 'q', 'p'], 'median']
+        beta, rmu, q, p = self.summary.loc[['beta', 'rmu', 'q', 'p'], 'median']
         t0 = self.data['t0'] - 1
         tq = self.data['tq'] - 1
         tf = self.data['tf'] - 1
@@ -188,7 +190,6 @@ class Analysis:
         # Integrate the SCIR equations over a time grid, after confinement (second regime)
         ret2 = odeint(SCIR, ret1[-1, :], t[int(tq / step):], args=(N, beta, q, p, rmu))
         ret = np.concatenate((ret1, ret2))
-
         return np.column_stack((t, ret)).T
     
     def autocorrelation_time_plot(self):
@@ -200,11 +201,11 @@ class Analysis:
     def peak_posterior(self, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False):
         peak_posterior(self, nthreads, binwidth, offset, second_wave)
 
-    def end_epidemic_plo(self, tf=380, threshold=1000.):
+    def end_epidemic_plot(self, tf, threshold=1000.):
         end_epidemic_plot(self, tf, threshold)
 
-    def plot_results(self, CI=95, Y=False, Z=False, observed=False):
-        plot_results(self, CI, Y, Z, observed)
+    def plot_results(self, ci=95, Y=False, Z=False, observed=False):
+        plot_results(self, ci, Y, Z, observed)
 
     def trace_plot(self, var=None):
         trace_plot(self, var)
