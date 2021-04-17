@@ -10,6 +10,7 @@
 #    4.1 create small modules
 # 5 plot functions in other modules
 # 6. use numba also for I_exact (new version in prova_numba)
+# 7. Add type annotation (with pycharm)
 
 
 import numpy as np
