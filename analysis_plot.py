@@ -1,6 +1,7 @@
 # To do:
 # 1. func plot_results()
 #    1.1 synthesize
+# 2. Add type annotation (with pycharm) 
 
 
 import numpy as np
