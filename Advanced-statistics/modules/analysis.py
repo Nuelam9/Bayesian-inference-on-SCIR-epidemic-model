@@ -17,12 +17,12 @@ import numpy as np
 import pandas as pd
 import pyjags as pj
 import arviz as az
-from utils import *
-from analysis_plot import *
 from statsmodels.tsa.stattools import acf
 from scipy.optimize import curve_fit
 from scipy.integrate import odeint
 from datetime import datetime as dt
+from utils import *
+from analysis_plot import *
 
 
 class Analysis:
@@ -217,8 +217,9 @@ class Analysis:
     def plot_summary(self):
         plot_summary(self)
 
+# import pickle
 ##' Save class object (Italy)
-# file_ita = open('results_ita.obj', 'wb')
+# file_ita = open('results_ita.pkl', 'wb')
 # pickle.dump(analysis_ita, file_ita)
 # file_ita.close()
 ## Load class object (Italy)

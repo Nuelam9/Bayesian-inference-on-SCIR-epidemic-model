@@ -1,10 +1,12 @@
 import sys
 import pandas as pd
 import numpy as np
-import pyjags as pj
-sys.path.append('modules/')
+import os
+dir = os.getcwd()
+sys.path.append(dir + '/modules/')
 from analysis import Analysis
-
+import warnings
+warnings.filterwarnings('ignore')
 
 df = pd.read_csv('Data/dataset_esp.csv')
 
@@ -27,7 +29,18 @@ analysis_esp = Analysis(date=df['Day'].to_numpy(),
 
 # call sampler analysis' method
 analysis_esp.sampler(nchains=12, nthreads=12, niter=10000, burn_in=0.5)
+samples = analysis_esp.samples
 
+# Save dictionary to file
+import pickle
+file = open('Results/samples_esp.pkl', 'wb')
+pickle.dump(analysis_esp, file)
+file.close()
 
-print(analysis_esp.samples)
-          
+# chains = analysis_esp.nchains
+# iters = int(analysis_esp.niter * analysis_esp.burn_in)
+
+# sub_param = {key: value for key, value in samples.items() if value.shape == (1,)}  # all parameters
+# sub_trace = {key: value for key, value in samples.items() if value.shape == (1, iters, chains)}  # beta, rmu, p, q
+# sub_fit = {key: value for key, value in samples.items() if np.sum(value.shape) > iters + chains + 1}  # y, z 
+# sub_data = {key: value for key, value in samples.items() if 1 < np.sum(value.shape) < iters}  # I, X
