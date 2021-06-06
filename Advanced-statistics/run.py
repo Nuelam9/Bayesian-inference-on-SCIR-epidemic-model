@@ -1,9 +1,7 @@
 import sys
 import pandas as pd
 import numpy as np
-import os
-dir = os.getcwd()
-sys.path.append(dir + '/modules/')
+sys.path.append('./modules/')
 from analysis import Analysis
 import warnings
 warnings.filterwarnings('ignore')
@@ -26,11 +24,11 @@ analysis_esp = Analysis(date=df['Day'].to_numpy(),
                         tauX=[0.01, 0.01],
                         country='Spain')
 
-
 # call sampler analysis' method
 analysis_esp.sampler(nchains=12, nthreads=12, niter=10000, burn_in=0.5)
 samples = analysis_esp.samples
 
+print("\nSaving simulation's results...")
 # Save dictionary to file
 import pickle
 file = open('Results/samples_esp.pkl', 'wb')
