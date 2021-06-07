@@ -9,31 +9,32 @@ warnings.filterwarnings('ignore')
 df = pd.read_csv('Data/dataset_esp.csv')
 
 # instantiating an analysis object
-analysis_esp = Analysis(date=df['Day'].to_numpy(),
-                        confirmed=df['Confirmed'].to_numpy(),
-                        recovered_death=df['Recovered_Death'].to_numpy(),
-                        quarantine='2020.03.09',
-                        last_data='2020.03.29',
-                        last_projection='2020.05.17',
-                        peak='2020.04.18',
-                        beta=[0,1],
-                        rmu=[0,1],
-                        q=[0,5],
-                        p=[0,5],
-                        tauI=[0.01, 0.01],
-                        tauX=[0.01, 0.01],
-                        country='Spain')
+analysis = Analysis(date=df['Day'].to_numpy(),
+                    confirmed=df['Confirmed'].to_numpy(),
+                    recovered_death=df['Recovered_Death'].to_numpy(),
+                    quarantine='2020.03.09',  # change
+                    last_data='2020.03.29',  # change
+                    last_projection='2020.05.17',  # change 
+                    peak='2020.04.18',  # change
+                    beta=[0,1],
+                    rmu=[0,1],
+                    q=[0,5],
+                    p=[0,5],
+                    tauI=[0.01, 0.01],
+                    tauX=[0.01, 0.01],
+                    country='Spain')  # change
 
 # call sampler analysis' method
-analysis_esp.sampler(nchains=12, nthreads=12, niter=10000, burn_in=0.5)
-samples = analysis_esp.samples
+analysis.sampler(nchains=10, nthreads=10, niter=10000, burn_in=0.5)
+samples = analysis.samples
 
 print("\nSaving simulation's results...")
 # Save dictionary to file
 import pickle
-file = open('Results/samples_esp.pkl', 'wb')
-pickle.dump(analysis_esp, file)
+file = open('Results/samples_esp_1.pkl', 'wb')  # change
+pickle.dump(analysis, file)
 file.close()
+
 
 # chains = analysis_esp.nchains
 # iters = int(analysis_esp.niter * analysis_esp.burn_in)
