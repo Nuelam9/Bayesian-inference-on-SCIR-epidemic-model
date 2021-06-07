@@ -3,10 +3,12 @@ import pandas as pd
 import numpy as np
 sys.path.append('./modules/')
 from analysis import Analysis
+from time import time
 import warnings
 warnings.filterwarnings('ignore')
 
 df = pd.read_csv('Data/dataset_esp.csv')
+# df = pd.read_csv('Data/dataset_ita.csv') 
 
 # instantiating an analysis object
 analysis = Analysis(date=df['Day'].to_numpy(),
@@ -25,16 +27,17 @@ analysis = Analysis(date=df['Day'].to_numpy(),
                     country='Spain')  # change
 
 # call sampler analysis' method
-analysis.sampler(nchains=10, nthreads=10, niter=10000, burn_in=0.5)
+analysis.sampler(nchains=10, nthreads=10, niter=30000, burn_in=0.5)
 samples = analysis.samples
 
 print("\nSaving simulation's results...")
+t1 = time()
 # Save dictionary to file
 import pickle
 file = open('Results/samples_esp_1.pkl', 'wb')  # change
 pickle.dump(analysis, file)
 file.close()
-
+print(time() - t1)
 
 # chains = analysis_esp.nchains
 # iters = int(analysis_esp.niter * analysis_esp.burn_in)
