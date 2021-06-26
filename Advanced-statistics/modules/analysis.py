@@ -14,15 +14,9 @@
 
 
 import numpy as np
-import pandas as pd
 import pyjags as pj
 import arviz as az
-from statsmodels.tsa.stattools import acf
-from scipy.optimize import curve_fit
-from scipy.integrate import odeint
 from datetime import datetime as dt
-from utils import *
-from analysis_plot import *
 
 
 class Analysis:
@@ -115,107 +109,9 @@ class Analysis:
         idata = az.from_pyjags(self.samples)
         param = az.summary(idata, round_to=4, var_names=['beta', 'rmu', 'q', 'p', 'tauI', 'tauX'],
                            stat_funcs=func_dict)
-
-        beta = self.samples['beta'].ravel()
-        rmu = self.samples['rmu'].ravel()
-        p = self.samples['p'].ravel()
-        q = self.samples['q'].ravel()
-        traces = pd.DataFrame((beta, rmu, p, q), index=['beta', 'rmu', 'p', 'q']).T
-        self.traces = traces
         self.idata = idata
         self.param = param
         return param[['median', 'sd', '2.5%_hdi', '97.5%_hdi', 'r_hat']]
-
-    @property
-    def infected_exact(self):
-        I0 = self.data['I0']
-        Iq = self.data['Iq']
-        t0 = self.data['t0'] - 1
-        tq = self.data['tq'] - 1
-        tf = self.data['tf']  # cause in np.arange tf - 1
-
-        # compute median of parameters for all chains
-        beta = np.median(self.samples['beta'].ravel())
-        rmu = np.median(self.samples['rmu'].ravel())
-        p = np.median(self.samples['p'].ravel())
-        q = np.median(self.samples['q'].ravel())
-
-        t = np.arange(t0, tf)
-        I = np.zeros(tf - t0, dtype=np.float64)
-        I[:tq] = I0 + (beta - rmu) * (t[:tq] - t0)
-        I[tq:] = Iq + ((beta * q) / (p + q) ** 2 * (1 - np.exp(-(p + q) * (t[tq:] - tq))) +
-                       (beta - rmu - beta * q / (q + p)) * (t[tq:] - tq))
-        return I
-
-    def autocorrelation_time(self, nlags=1000):
-        def fit_time(x, tau):
-            return np.exp(-x / tau)
-
-        times = np.zeros((self.nchains, len(self.varname)))
-        x = np.arange(nlags + 1)
-        for i in range(len(self.varname)):
-            for j in range(self.nchains):
-                y = acf(self.samples[self.varname[i]][0, :, j], fft=True, nlags=nlags)
-                popt, pcov = curve_fit(fit_time, x, y)
-                times[j, i] = popt
-        return times
-
-    def solve_SCIR(self, step=0.01):
-        """
-        Numerical solution of SCIR model with chosen parameters (median posteriors).
-        This data is fitted to show less (but still big) width area of predictive
-        posterior interval
-        """
-        # Total population, N
-        if self.country == 'Spain':
-            N = 46754783.
-        elif self.country == 'Italy':
-            N = 60461828.
-
-        # Contact rate (beta), mean recovery+death rate, rmu,
-        # rate of specific measures restricting mobility and contacts (q),
-        # rate of individuals that leave the confinement measure (p) (all in 1/days)
-        beta, rmu, q, p = self.summary.loc[['beta', 'rmu', 'q', 'p'], 'median']
-        t0 = self.data['t0'] - 1
-        tq = self.data['tq'] - 1
-        tf = self.data['tf'] - 1
-        # Initial conditions for the first regime
-        I0 = np.exp(self.data['I'][0])
-        X0 = np.exp(self.data['X'][0])
-        S0 = N - I0 - X0
-        C0 = 0.
-        state0 = np.array([S0, C0, I0, X0])
-        # Integrate the SCIR equations over a time grid before confinement (first regime)
-        t = np.arange(t0, tf, step)
-        ret1 = odeint(SCIR, state0, t[:int(tq / step)], args=(N, beta, q * 0, p * 0, rmu))
-        # Integrate the SCIR equations over a time grid, after confinement (second regime)
-        ret2 = odeint(SCIR, ret1[-1, :], t[int(tq / step):], args=(N, beta, q, p, rmu))
-        ret = np.concatenate((ret1, ret2))
-        return np.column_stack((t, ret)).T
-    
-    def autocorrelation_time_plot(self):
-        autocorrelation_time_plot(self)
-
-    def autocorr_fit_plot(self, xmin=-10, xmax=200, var=None):
-        autocorr_fit_plot(self, xmin, xmax, var)
-
-    def peak_posterior(self, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False):
-        peak_posterior(self, nthreads, binwidth, offset, second_wave)
-
-    def end_epidemic_plot(self, tf, threshold=1000.):
-        end_epidemic_plot(self, tf, threshold)
-
-    def plot_results(self, ci=95, Y=False, Z=False, observed=False):
-        plot_results(self, ci, Y, Z, observed)
-
-    def trace_plot(self, var=None):
-        trace_plot(self, var)
-
-    def posteriors(self, var=None):
-        posteriors(self, var)
-
-    def plot_summary(self):
-        plot_summary(self)
 
 # import pickle
 ##' Save class object (Italy)

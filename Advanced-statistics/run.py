@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 sys.path.append('./modules/')
 from analysis import Analysis
+import matplotlib.pyplot as plt
 from time import time
 import warnings
 warnings.filterwarnings('ignore')
@@ -27,17 +28,30 @@ analysis = Analysis(date=df['Day'].to_numpy(),
                     country='Spain')  # change
 
 # call sampler analysis' method
-analysis.sampler(nchains=10, nthreads=10, niter=30000, burn_in=0.5)
-samples = analysis.samples
+analysis.sampler(nchains=10, nthreads=10, niter=10000, burn_in=0.5)
+results = { **analysis.data, **analysis.samples,
+           'date': analysis.date,
+           'peak': analysis.peak,
+           'nchains': analysis.nchains,
+           'niter': analysis.niter,
+           'burn_in': analysis.burn_in,
+           'country': analysis.country,
+           'varname': analysis.varname,
+           'names': analysis.names }
+
+
+print('\n')
+print('Summary:')
+print(analysis.summary)
 
 print("\nSaving simulation's results...")
 t1 = time()
 # Save dictionary to file
 import pickle
-file = open('Results/samples_esp_1.pkl', 'wb')  # change
-pickle.dump(analysis, file)
+file = open('Results/results_esp_1.pkl', 'wb')  # change
+pickle.dump(results, file)
 file.close()
-print(time() - t1)
+print(f'{time() - t1:.4f}s')
 
 # chains = analysis_esp.nchains
 # iters = int(analysis_esp.niter * analysis_esp.burn_in)

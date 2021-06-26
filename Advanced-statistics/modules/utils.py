@@ -1,7 +1,8 @@
-import threading
+import threading  # change trading cause is obsolete 
 import math
 import numpy as np
 from numba import jit
+from scipy.integrate import odeint
 
 
 def func_np(beta, rmu, p, q):
@@ -23,6 +24,7 @@ def peak_time_nb(result, beta, rmu, p, q):
     for i in range(len(result)):
         result[i] = 1 / (p[i] + q[i]) * math.log(beta[i] * q[i] / (rmu[i] * (p[i] + q[i]) - beta[i] * p[i]))
 
+
 @jit('void(double[:], double[:,:], double, double)',
       nopython=True, nogil=True)
 def epidemic_end(times, I, threshold, tmax):
@@ -31,6 +33,7 @@ def epidemic_end(times, I, threshold, tmax):
     """
     for i in range(len(times)):
         times[i] = np.argmax(I[:, i] < np.log(threshold)) + tmax
+
 
 def make_singlethread(inner_func):
     """
@@ -42,6 +45,7 @@ def make_singlethread(inner_func):
         inner_func(result, *args)
         return result
     return func
+
 
 def make_multithread(inner_func, numthreads):
     """
@@ -66,12 +70,35 @@ def make_multithread(inner_func, numthreads):
         return result
     return func_mt
 
+
 def rounding(med, std):
     dim = len(str(int(med)))
     prec = len(str(int(std)))
     med_round = int(round(med / 10 ** dim, prec) * 10 ** dim)
     std_round = int(round(std / 10 ** prec, 1) * 10 ** prec)
     return med_round, std_round
+
+
+def infected_exact(samples):
+    I0 = samples['I0']
+    Iq = samples['Iq']
+    t0 = samples['t0'] - 1
+    tq = samples['tq'] - 1
+    tf = samples['tf']  # cause in np.arange tf - 1
+
+    # compute median of parameters for all chains
+    beta = np.median(samples['beta'])
+    rmu = np.median(samples['rmu'])
+    p = np.median(samples['p'])
+    q = np.median(samples['q'])
+
+    t = np.arange(t0, tf)
+    I = np.zeros(tf - t0, dtype=np.float64)
+    I[:tq] = I0 + (beta - rmu) * (t[:tq] - t0)
+    I[tq:] = Iq + ((beta * q) / (p + q) ** 2 * (1 - np.exp(-(p + q) * (t[tq:] - tq))) +
+                    (beta - rmu - beta * q / (q + p)) * (t[tq:] - tq))
+    return I
+
 
 # The SCIR model differential equations
 def SCIR(state, t, N, beta, q, p, rmu):
@@ -84,3 +111,40 @@ def SCIR(state, t, N, beta, q, p, rmu):
             q * S - p * C,
             beta / N * I * S - rmu * I,
             rmu * I)
+
+
+def solve_SCIR(samples, step=0.01):
+    """
+    Numerical solution of SCIR model with chosen parameters (median posteriors).
+    This data is fitted to show less (but still big) width area of predictive
+    posterior interval
+    """
+    # Total population, N
+    if samples['country'] == 'Spain':
+        N = 46754783.
+    elif samples['country'] == 'Italy':
+        N = 60461828.
+
+    # Contact rate (beta), mean recovery+death rate, rmu,
+    # rate of specific measures restricting mobility and contacts (q),
+    # rate of individuals that leave the confinement measure (p) (all in 1/days)
+    beta = np.median(samples['beta'])
+    rmu = np.median(samples['rmu'])
+    p = np.median(samples['p'])
+    q = np.median(samples['q'])
+    t0 = samples['t0'] - 1
+    tq = samples['tq'] - 1
+    tf = samples['tf'] - 1
+    # Initial conditions for the first regime
+    I0 = np.exp(samples['I'][0])
+    X0 = np.exp(samples['X'][0])
+    S0 = N - I0 - X0
+    C0 = 0.
+    state0 = np.array([S0, C0, I0, X0])
+    # Integrate the SCIR equations over a time grid before confinement (first regime)
+    t = np.arange(t0, tf, step)
+    ret1 = odeint(SCIR, state0, t[:int(tq / step)], args=(N, beta, q * 0, p * 0, rmu))
+    # Integrate the SCIR equations over a time grid, after confinement (second regime)
+    ret2 = odeint(SCIR, ret1[-1, :], t[int(tq / step):], args=(N, beta, q, p, rmu))
+    ret = np.concatenate((ret1, ret2))
+    return np.column_stack((t, ret)).T
