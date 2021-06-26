@@ -1,31 +1,31 @@
 import sys
 import pandas as pd
 import numpy as np
-sys.path.append('./modules/')
+sys.path.append('../modules/')
 from analysis import Analysis
 import matplotlib.pyplot as plt
 from time import time
 import warnings
 warnings.filterwarnings('ignore')
 
-df = pd.read_csv('Data/dataset_esp.csv')
-# df = pd.read_csv('Data/dataset_ita.csv') 
+df = pd.read_csv('../Data/dataset_esp.csv')
+
 
 # instantiating an analysis object
 analysis = Analysis(date=df['Day'].to_numpy(),
                     confirmed=df['Confirmed'].to_numpy(),
                     recovered_death=df['Recovered_Death'].to_numpy(),
-                    quarantine='2020.03.09',  # change
-                    last_data='2020.03.29',  # change
-                    last_projection='2020.05.17',  # change 
-                    peak='2020.04.18',  # change
+                    quarantine='2020.03.09',
+                    last_data='2020.03.29',
+                    last_projection='2020.05.17', 
+                    peak='2020.04.18',
                     beta=[0,1],
                     rmu=[0,1],
                     q=[0,5],
                     p=[0,5],
                     tauI=[0.01, 0.01],
                     tauX=[0.01, 0.01],
-                    country='Spain')  # change
+                    country='Spain')
 
 # call sampler analysis' method
 analysis.sampler(nchains=10, nthreads=10, niter=10000, burn_in=0.5)
@@ -48,7 +48,7 @@ print("\nSaving simulation's results...")
 t1 = time()
 # Save dictionary to file
 import pickle
-file = open('Results/results_esp_1.pkl', 'wb')  # change
+file = open('../Results/results_before_peak_esp.pkl', 'wb')
 pickle.dump(results, file)
 file.close()
 print(f'{time() - t1:.4f}s')
