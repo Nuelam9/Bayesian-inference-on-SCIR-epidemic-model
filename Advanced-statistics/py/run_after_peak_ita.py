@@ -16,7 +16,7 @@ analysis = Analysis(date=df['Day'],
                     confirmed=df['Confirmed_smooth'].to_numpy(),
                     recovered_death=df['Recovered_Death_smooth'].to_numpy(),
                     quarantine='2020.03.09',
-                    last_data='2020.04.23',
+                    last_data='2020.04.23',   # motivate choise
                     last_projection='2020.07.23',
                     peak='2020.04.23',
                     beta=[0,1],
