@@ -74,7 +74,7 @@ class Analysis:
         self.data_processing()
 
         # Construct JAGS Model
-        jags_model = open('../modules/model', 'r').read()
+        jags_model = open('../../modules/model', 'r').read()
         model = pj.Model(code=jags_model,
                          data=self.data,
                          chains=nchains,
