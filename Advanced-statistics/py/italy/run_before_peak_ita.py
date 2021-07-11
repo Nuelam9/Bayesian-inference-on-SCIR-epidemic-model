@@ -56,7 +56,7 @@ else:
     t1 = time()
     # Save dictionary to file
     import pickle
-    file = open('../../Results/results_before_peak_ita.pkl', 'wb')
+    file = open('../../Results/ita/first_wave/results_before_peak_ita.pkl', 'wb')
     pickle.dump(results, file)
     file.close()
     print(f'{time() - t1:.4f}s')
