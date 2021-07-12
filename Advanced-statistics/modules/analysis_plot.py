@@ -143,7 +143,6 @@ def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, sec
     ax.set_xlabel('Days since first confirmed case')
     ax.set_ylabel('Distribution of peak')
     plt.legend()
-    plt.show()
     # Add peak times series to Analysis attribute
     return t_peak
 
