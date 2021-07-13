@@ -1,16 +1,10 @@
 # To do:
 # 1. func plot_results()
 #    1.1 synthesize
-#    1.2 in other module
-# 2. change in plot or where it comes
+# 2. change in plot or where it comes:
 #    2.1 the evaluation of same things (waste of time)
-# 3. in peak_posterior:
-#    3.1 change dataframe in ndarray (use numba)
-# 4. all code:
-#    4.1 create small modules
-# 5 plot functions in other modules
-# 6. use numba also for I_exact (new version in prova_numba)
-# 7. Add type annotation (with pycharm)
+# 3. try to use numba also for I_exact (new version in prova_numba)
+# 4. Add type annotation (with pycharm)
 
 
 import numpy as np
@@ -74,7 +68,7 @@ class Analysis:
         self.data_processing()
 
         # Construct JAGS Model
-        jags_model = open('../../modules/model', 'r').read()
+        jags_model = open('../../../modules/model', 'r').read()
         model = pj.Model(code=jags_model,
                          data=self.data,
                          chains=nchains,

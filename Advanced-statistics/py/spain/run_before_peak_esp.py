@@ -11,7 +11,7 @@ warnings.filterwarnings('ignore')
 df = pd.read_csv('../../Data/dataset_esp.csv')
 
 if len(sys.argv) < 5:
-    print("nchain (10), nthreads (10), niters (100000), burn_in (0.5)")
+    print("nchain (10), nthreads (10), niters (200000), burn_in (0.5)")
 else:
     # getting number of iterations as command-line arguments 
     nchains = int(sys.argv[1])
@@ -21,7 +21,7 @@ else:
 
     # instantiating an analysis object
     analysis = Analysis(date=df['Day'].to_numpy(),
-                        confirmed=df['Confirmed'].to_numpy(),
+                        confirmed=df['Active_cases'].to_numpy(),
                         recovered_death=df['Recovered_Death'].to_numpy(),
                         quarantine='2020.03.09',
                         last_data='2020.03.29',
