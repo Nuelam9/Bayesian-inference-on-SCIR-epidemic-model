@@ -9,7 +9,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 df = pd.read_csv('../../../Data/dataset_ita.csv')
-df = df[df.Day > '2020.10.10'].reset_index(drop=True)
+df = df[df.Day > '2020.09.05'].reset_index(drop=True)
 
 if len(sys.argv) < 5:
     print("nchain (10), nthreads (10), niters (200000), burn_in (0.5)")
@@ -24,12 +24,12 @@ else:
     analysis = Analysis(date=df['Day'],
                             confirmed=df['Active_cases_smooth'].to_numpy(),
                             recovered_death=df['Recovered_Death_smooth'].to_numpy(),
-                            quarantine='2020.11.06',
+                            quarantine='2020.10.08',
                             last_data='2020.11.12',
                             last_projection='2020.12.29',
                             peak='2020.11.27',
-                            beta=[0,0.2],
-                            rmu=[0,0.2],
+                            beta=[0,1],
+                            rmu=[0,1],
                             q=[0,5],
                             p=[0,5],
                             tauI=[0.01, 0.01],

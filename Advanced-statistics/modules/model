@@ -15,11 +15,11 @@ model {
                     (beta - rmu - beta * q / (q + p)) * (t - tq)), tauI)
     }
     # Regression for new death+recovered cases
-    for(t in (tX0):tmax) {
+    for(t in tX0:tmax) {
         X[t] ~ dnorm(log(rmu) + I[t], tauX)  # New Deaths + Recovered
     }
     # Posterior predictive for new deaths+recovered (extended until tf)
-    for(t in tX0:tf) {
+    for(t in (tX0):tf) {
         z[t] ~ dnorm(log(rmu) + y[t], tauX)
     }
     # Priors for parameters
