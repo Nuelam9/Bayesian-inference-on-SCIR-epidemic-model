@@ -147,7 +147,15 @@ def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, sec
     return t_peak
 
 
-def end_epidemic_plot(samples, tf, threshold=1000.):
+def end_epidemic_plot(samples, tf, threshold=None):
+    if threshold is None:
+        if samples['country'] == 'Italy':
+            threshold = 1200.
+        elif samples['country'] == 'Spain':
+            threshold = 1000.
+        elif samples['country'] == 'France':
+            threshold = 1300.
+
     tq = samples['tq'] - 1
     tmax = samples['tmax'] - 1
     fmt = '%Y.%m.%d'
