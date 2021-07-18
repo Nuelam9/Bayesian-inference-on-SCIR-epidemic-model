@@ -53,7 +53,11 @@ else:
             'burn_in': analysis.burn_in,
             'varname': analysis.varname,
             'names': analysis.names,
+<<<<<<< HEAD
             'country': 'France' }
+=======
+            'country'='France'}
+>>>>>>> 0762c9b08d06ab0459abc114b4a7e2e6c8f13667
 
     # Save dictionary to file
     import pickle
