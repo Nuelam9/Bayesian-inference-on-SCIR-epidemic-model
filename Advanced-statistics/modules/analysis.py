@@ -16,7 +16,7 @@ from datetime import datetime as dt
 class Analysis:
 
     def __init__(self, date, confirmed, recovered_death, quarantine, last_data,
-                 last_projection, peak, beta, rmu, q, p, tauI, tauX, country):
+                 last_projection, peak, beta, rmu, q, p, tauI, tauX):
         self.date = date
         self.confirmed = confirmed
         self.recovered_death = recovered_death
@@ -30,7 +30,6 @@ class Analysis:
         self.p = p
         self.tauI = tauI
         self.tauX = tauX
-        self.country = country
         self.varname = np.array(['beta', 'rmu', 'p', 'q', 'tauX', 'tauI'])
         self.names = np.array([r'$ \mathbf{\beta} $', r'$ \mathbf{r + \mu} $',
                                '$ \mathbf{p} $', '$ \mathbf{q} $', r'$ \mathbf{\sigma_{X}} $',
