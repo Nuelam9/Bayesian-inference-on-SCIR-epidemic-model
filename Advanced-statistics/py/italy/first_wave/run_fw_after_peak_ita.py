@@ -32,8 +32,7 @@ else:
                         q=[0,5],
                         p=[0,5],
                         tauI=[0.01, 0.01],
-                        tauX=[0.01, 0.01],
-                        country='Italy')
+                        tauX=[0.01, 0.01])
 
     # call sampler analysis' method
     analysis.sampler(nchains=nchains, nthreads=nthreads, niter=niter, burn_in=burn_in)
@@ -43,9 +42,9 @@ else:
             'nchains': analysis.nchains,
             'niter': analysis.niter,
             'burn_in': analysis.burn_in,
-            'country': analysis.country,
             'varname': analysis.varname,
-            'names': analysis.names }
+            'names': analysis.names,
+            'country': 'Italy'}
 
 
     print('\n')
