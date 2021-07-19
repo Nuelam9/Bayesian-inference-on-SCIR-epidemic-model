@@ -113,7 +113,7 @@ def SCIR(state, t, N, beta, q, p, rmu):
             rmu * I)
 
 
-def solve_SCIR(samples, step=0.01):
+def solve_SCIR(samples, step=0.01, tf=None):
     """
     Numerical solution of SCIR model with chosen parameters (median posteriors).
     This data is fitted to show less (but still big) width area of predictive
@@ -124,6 +124,8 @@ def solve_SCIR(samples, step=0.01):
         N = 46754783.
     elif samples['country'] == 'Italy':
         N = 60461828.
+    elif samples['country'] == 'France':
+        N = 65273511.
 
     # Contact rate (beta), mean recovery+death rate, rmu,
     # rate of specific measures restricting mobility and contacts (q),
@@ -134,7 +136,8 @@ def solve_SCIR(samples, step=0.01):
     q = np.median(samples['q'])
     t0 = samples['t0'] - 1
     tq = samples['tq'] - 1
-    tf = samples['tf'] - 1
+    if tf is None:
+        tf = samples['tf'] - 1
     # Initial conditions for the first regime
     I0 = np.exp(samples['I'][0])
     X0 = np.exp(samples['X'][0])
