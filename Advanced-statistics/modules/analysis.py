@@ -15,12 +15,12 @@ from datetime import datetime as dt
 
 class Analysis:
 
-    def __init__(self, date, confirmed, recovered_death, quarantine, last_data,
+    def __init__(self, date, confirmed, recovered_death, confinement, last_data,
                  last_projection, peak, beta, rmu, q, p, tauI, tauX):
         self.date = date
         self.confirmed = confirmed
         self.recovered_death = recovered_death
-        self.quarantine = quarantine
+        self.confinement = confinement
         self.last_data = last_data
         self.last_projection = last_projection
         self.peak = peak
@@ -48,13 +48,13 @@ class Analysis:
         # Setting parameters
         t0 = (I > 0).argmax()  # First day with more than 1 confirmed case
         tX0 = (X > 0).argmax()  # First day with more than 1 new death or recovered
-        tq = np.where(self.date == self.quarantine)[0][0]  # Begin quarantine
+        tq = np.where(self.date == self.confinement)[0][0]  # Begin confinement
         tmax = np.where(self.date == self.last_data)[0][0]  # Last data-point used for estimation
         fmt = '%Y.%m.%d'
         tf = (dt.strptime(self.last_projection, fmt) - dt.strptime(self.date[0],
                                                                    fmt)).days  # Last day to project the data
         I0 = I[t0]  # First datum in the Active cases series
-        Iq = I[tq]  # First datum after quarantine in the Active cases series
+        Iq = I[tq]  # First datum after confinement in the Active cases series
 
         # return time+1 because in JAGS arrays are indexed from 1
         self.data = dict(b0=self.beta[0], b1=self.beta[1], r0=self.rmu[0], r1=self.rmu[1],
