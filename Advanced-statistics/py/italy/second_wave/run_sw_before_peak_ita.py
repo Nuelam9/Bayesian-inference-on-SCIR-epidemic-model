@@ -3,13 +3,9 @@ import pandas as pd
 import numpy as np
 sys.path.append('../../../modules/')
 from analysis import Analysis
-import matplotlib.pyplot as plt
 from time import time
 import warnings
 warnings.filterwarnings('ignore')
-
-df = pd.read_csv('../../../Data/dataset_ita.csv')
-df = df[df.Day > '2020.09.05'].reset_index(drop=True)
 
 if len(sys.argv) < 5:
     print("nchain (10), nthreads (10), niters (200000), burn_in (0.5)")
@@ -20,11 +16,15 @@ else:
     niter = int(sys.argv[3])
     burn_in = float(sys.argv[4])
 
+    # get data to fit
+    df = pd.read_csv('../../../Data/dataset_ita.csv')
+    df = df[df.Day > '2020.09.05'].reset_index(drop=True)
+
     # instantiating an analysis object
     analysis = Analysis(date=df['Day'],
                             confirmed=df['Active_cases_smooth'].to_numpy(),
                             recovered_death=df['Recovered_Death_smooth'].to_numpy(),
-                            quarantine='2020.10.08',
+                            confinement='2020.10.08',
                             last_data='2020.11.12',
                             last_projection='2020.12.29',
                             peak='2020.11.27',
