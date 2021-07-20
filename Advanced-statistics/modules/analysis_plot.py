@@ -100,7 +100,7 @@ def autocorr_fit_plot(samples, var, total=True, xmin=-10, xmax=200):
         ax.set_title(f"Autocorrelation fit for {samples['names'][ind]} of Chain {j + 1}", weight='bold')
 
 
-def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False):
+def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False, label_size=12):
     beta, rmu, p, q = samples['beta'], samples['rmu'], samples['p'], samples['q']
     # Filter out parameters with no confinement regime
     mask = rmu * (p + q) > beta * p
@@ -140,14 +140,14 @@ def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, sec
     y_lim = ax.get_ylim()[1] / 3
     ax.text(samples['tq'] - offset, y_lim, string, rotation=90)
     ax.text(samples['tmax'] - offset, y_lim, 'Last data point fitted', rotation=90)
-    ax.set_xlabel('Days since first confirmed case')
-    ax.set_ylabel('Distribution of peak')
+    ax.set_xlabel('Days since first confirmed case', fontsize=label_size)
+    ax.set_ylabel('Probability of peak', fontsize=label_size)
+    plt.grid()
     plt.legend()
-    # Add peak times series to Analysis attribute
     return t_peak
 
 
-def end_epidemic_plot(samples, tf, threshold=None):
+def end_epidemic_plot(samples, tf, threshold=None, label_size=12):
     if threshold is None:
         if samples['country'] == 'Italy':
             threshold = 1200.
@@ -188,11 +188,11 @@ def end_epidemic_plot(samples, tf, threshold=None):
     ax.axvline(np.median(times), c='r', label=textstr)
     plt.legend()
     plt.grid()
-    plt.xlabel('Days since first confirmed case')
-    plt.ylabel(f'Distribution of confirmed < {int(threshold)}')
+    plt.xlabel('Days since first confirmed case', fontsize=label_size)
+    plt.ylabel(f'Probability of confirmed < {int(threshold)}', fontsize=label_size)
 
 
-def plot_results(samples, ci=95, Y=False, Z=False, observed=False):
+def plot_results(samples, ci=95, Y=False, Z=False, observed=False, label_size=12, title_size=16):
     t0 = samples['t0'] - 1
     tmax = samples['tmax'] - 1
     tX0 = samples['tX0'] - 1
@@ -234,9 +234,9 @@ def plot_results(samples, ci=95, Y=False, Z=False, observed=False):
 
         r2 = (stats.linregress(y_true, y_pred)[2]) ** 2
         plt.annotate(r'$r^{2}$=' + f'{r2:.6f}', xy=(0.85, 0.97), xycoords='axes fraction')
-        plt.xlabel(f"Days since first confirmed case ({samples['date'][t0]})")
-        plt.ylabel("Active cases ($\mathbf{log_{10}}$)")
-        plt.title(f"Active cases {samples['country']}", fontsize=16, fontweight='bold')
+        plt.xlabel(f"Days since first confirmed case ({samples['date'][t0]})", fontsize=label_size)
+        plt.ylabel("Active cases ($\mathbf{log_{10}}$)", fontsize=label_size)
+        plt.title(f"Active cases {samples['country']}", fontsize=title_size, fontweight='bold')
         plt.legend(loc='upper left')
 
     elif Z:
@@ -273,13 +273,13 @@ def plot_results(samples, ci=95, Y=False, Z=False, observed=False):
         # Goodness of fit, r-square (square of pearson's coefficient)
         r2 = (stats.linregress(z_true, z_pred)[2]) ** 2
         plt.annotate(r'$r^{2}=%.6f$' % r2, xy=(0.85, 0.97), xycoords='axes fraction')
-        plt.xlabel(f"Days since first death+recovered case ({samples['date'][tX0]})")
-        plt.ylabel("Variation of death+recovered cases ($\mathbf{log_{10}}$)")
+        plt.xlabel(f"Days since first recovered+dead case ({samples['date'][tX0]})", fontsize=label_size)
+        plt.ylabel("Number of new recovered+dead cases ($\mathbf{log_{10}}$)", fontsize=label_size)
         plt.legend(loc='upper left')
-        plt.title("Daily variation of death+recovered cases %s" % samples['country'], fontsize=16, fontweight='bold')
+        plt.title("Daily number of new dead and recovered cases %s" % samples['country'], fontsize=title_size, fontweight='bold')
 
 
-def trace_plot(samples, var, total=True):
+def trace_plot(samples, var, total=True, title_size=16):
     ind = np.where(samples['varname'] == var)[0][0]
     samples_size = int(samples['niter'] * samples['burn_in'])
     if not total:
@@ -322,7 +322,7 @@ def trace_plot(samples, var, total=True):
             ax.set_xlabel('MCMC step')
             ax.tick_params(axis='x', which='major', labelsize=8.5)
             ax.set_title(f"Chain {(i + 1):d}", fontweight='bold')
-        fig.suptitle(f"Trace of {samples['names'][ind]}", fontsize=16, fontweight='bold')
+        fig.suptitle(f"Trace of {samples['names'][ind]}", fontsize=title_size, fontweight='bold')
         plt.show()
 
     
