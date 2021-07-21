@@ -12,7 +12,6 @@ from utils import *
 from os import cpu_count
 from statsmodels.tsa.stattools import acf
 from scipy.optimize import curve_fit
-from scipy.integrate import odeint
 from datetime import datetime as dt  # in end_epidemic
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
