@@ -99,11 +99,12 @@ def autocorr_fit_plot(samples, var, total=True, xmin=-10, xmax=200):
         ax.set_title(f"Autocorrelation fit for {samples['names'][ind]} of Chain {j + 1}", weight='bold')
 
 
-def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False, label_size=12):
+def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False, label_size=12, tick_size=10):
     beta, rmu, p, q = samples['beta'], samples['rmu'], samples['p'], samples['q']
     # Filter out parameters with no confinement regime
     mask = rmu * (p + q) > beta * p
     t0 = samples['t0'] - 1
+    dates = pd.to_datetime(samples['date'], format='%Y.%m.%d').dt.strftime('%d/%m/%Y')
     
     # Compute t_peak from the analytical expression for the epidemic's peak
     if len(mask) >= 1e6:
@@ -139,14 +140,16 @@ def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, sec
     y_lim = ax.get_ylim()[1] / 3
     ax.text(samples['tq'] - offset, y_lim, string, rotation=90)
     ax.text(samples['tmax'] - offset, y_lim, 'Last data point fitted', rotation=90)
-    ax.set_xlabel('Days since first confirmed case', fontsize=label_size)
+    ax.set_xlabel(f'Days since first confirmed case ({dates[t0]})', fontsize=label_size)
     ax.set_ylabel('Probability of peak', fontsize=label_size)
+    ax.tick_params(axis='x', labelsize=tick_size)
+    ax.tick_params(axis='y', labelsize=tick_size)
     plt.grid()
     plt.legend()
     return t_peak
 
 
-def end_epidemic_plot(samples, tf, threshold=None, label_size=12):
+def end_epidemic_plot(samples, tlast, threshold=None, label_size=12, tick_size=10):
     if threshold is None:
         if samples['country'] == 'Italy':
             threshold = 1200.
@@ -155,17 +158,19 @@ def end_epidemic_plot(samples, tf, threshold=None, label_size=12):
         elif samples['country'] == 'France':
             threshold = 1300.
 
+    t0 = samples['t0'] - 1
     tq = samples['tq'] - 1
     tmax = samples['tmax'] - 1
     fmt = '%Y.%m.%d'
-    tf = (dt.strptime(tf, fmt) - dt.strptime(samples['date'][0], fmt)).days
+    tlast = (dt.strptime(tlast, fmt) - dt.strptime(samples['date'][0], fmt)).days
+    dates = pd.to_datetime(samples['date'], format='%Y.%m.%d').dt.strftime('%d/%m/%Y')
     Iq = samples['Iq']
     beta, rmu, p, q = samples['beta'], samples['rmu'], samples['p'], samples['q']
     # Filter out parameters with no confinement regime
     mask = rmu * (p + q) > beta * p
     beta, rmu, p, q = beta[mask], rmu[mask], p[mask], q[mask]
 
-    t = np.array([np.arange(tmax, tf)] * len(beta)).T
+    t = np.array([np.arange(tmax, tlast)] * len(beta)).T
     I = Iq + ((beta * q) / (p + q) ** 2 * (1 - np.exp(-(p + q) * (t - tq))) +
               (beta - rmu - beta * q / (q + p)) * (t - tq))
     # Compute times until the number of confirmed cases falls below threshold for the first time
@@ -185,19 +190,22 @@ def end_epidemic_plot(samples, tf, threshold=None, label_size=12):
     textstr = f'({med:d}' + r' $\pm$ ' + f'{std:d}) days'
     ax = plt.gca()
     ax.axvline(np.median(times), c='r', label=textstr)
+    plt.xlabel(f'Days since first confirmed case ({dates[t0]})', fontsize=label_size)
+    plt.ylabel(f'Probability of confirmed < {int(threshold)}', fontsize=label_size)
+    ax.tick_params(axis='x', labelsize=tick_size)
+    ax.tick_params(axis='y', labelsize=tick_size)
     plt.legend()
     plt.grid()
-    plt.xlabel('Days since first confirmed case', fontsize=label_size)
-    plt.ylabel(f'Probability of confirmed < {int(threshold)}', fontsize=label_size)
 
 
-def plot_results(samples, ci=95, Y=False, Z=False, observed=False, label_size=12, title_size=16):
+def plot_results(samples, ci=95, Y=False, Z=False, observed=False, label_size=14, tick_size=10, title_size=16):
     t0 = samples['t0'] - 1
     tmax = samples['tmax'] - 1
     tX0 = samples['tX0'] - 1
     tf = samples['tf']
     I_exact = infected_exact(samples) / np.log(10)
     _, b, c = samples['y'].shape
+    dates = pd.to_datetime(samples['date'], format='%Y.%m.%d').dt.strftime('%d/%m/%Y')
 
     fig, ax = plt.subplots(figsize=(16, 8))
     plt.grid()
@@ -211,30 +219,33 @@ def plot_results(samples, ci=95, Y=False, Z=False, observed=False, label_size=12
         y2 = np.percentile(y, (100 - ci) / 2, axis=1) / np.log(10)
 
         t = np.arange(t0, tmax) - t0
-        plt.scatter(t, I[t0:tmax], fc='w', ec='k', label='Fitted data')
+        plt.scatter(dates[t], I[t0:tmax], fc='w', ec='k', label='Fitted data')
         plt.plot(I_exact, c='orange', label='Fit+prediction')
         t = np.arange(t0, tf) - t0
-        plt.fill_between(t, y1[t0:tf], y2[t0:tf], alpha=0.3, color='orange', label=f'{ci}% CI')
+        plt.fill_between(dates[t], y1[t0:tf], y2[t0:tf], alpha=0.3, color='orange', label=f'{ci}% CI')
 
         if observed:
             # prevision beyond dataset's time
             if tf - 1 > len(I):
                 t = np.arange(tmax, len(I)) - t0
-                plt.scatter(t, I[tmax:], fc='g', ec='k', alpha=0.5, label='Observed data')
+                plt.scatter(dates[t], I[tmax:], fc='g', ec='k', alpha=0.5, label='Observed data')
             else:
                 t = np.arange(tmax, tf) - t0
-                plt.scatter(t, I[tmax:tf], fc='g', ec='k', alpha=0.5, label='Observed data')
+                plt.scatter(dates[t], I[tmax:tf], fc='g', ec='k', alpha=0.5, label='Observed data')
                 # actual peak data of a chosen epidemic wave
                 tpeak = np.where(samples['date'] == samples['peak'])[0][0] - t0
-                plt.scatter(tpeak - t0, I[tpeak], fc='r', ec='k', label='Actual peak')
+                plt.scatter(dates[tpeak - t0], I[tpeak], fc='r', ec='k', label='Actual peak')
 
         y_true = I[t0:tmax]
         y_pred = I_exact[t0:tmax]
 
         r2 = (stats.linregress(y_true, y_pred)[2]) ** 2
         plt.annotate(r'$r^{2}$=' + f'{r2:.6f}', xy=(0.85, 0.97), xycoords='axes fraction')
-        plt.xlabel(f"Days since first confirmed case ({samples['date'][t0]})", fontsize=label_size)
+        plt.xlabel(f"Days since first confirmed case ({dates[t0]})", fontsize=label_size)
         plt.ylabel("Active cases ($\mathbf{log_{10}}$)", fontsize=label_size)
+        plt.xticks(dates[np.arange(t0, tf, 20)])
+        plt.tick_params(axis='x', labelsize=tick_size)
+        plt.tick_params(axis='y', labelsize=tick_size)
         plt.title(f"Active cases {samples['country']}", fontsize=title_size, fontweight='bold')
         plt.legend(loc='upper left')
 
@@ -252,19 +263,19 @@ def plot_results(samples, ci=95, Y=False, Z=False, observed=False, label_size=12
         z_med = np.median(z, axis=1) / np.log(10)
 
         t = np.arange(tX0, tf) - tX0
-        plt.plot(t, z_med[tX0:], c='orange', label='Fit+prediction')
+        plt.plot(dates[t], z_med[tX0:], c='orange', label='Fit+prediction')
         t = np.arange(tX0, tmax) - tX0
-        plt.scatter(t, X[tX0:tmax], fc='w', ec='k', label='Fitted data')
+        plt.scatter(dates[t], X[tX0:tmax], fc='w', ec='k', label='Fitted data')
         t = np.arange(tX0, tf) - tX0
-        plt.fill_between(t, z1[tX0:tf], z2[tX0:tf], alpha=0.3, color='orange', label=f'{ci}% CI')
+        plt.fill_between(dates[t], z1[tX0:tf], z2[tX0:tf], alpha=0.3, color='orange', label=f'{ci}% CI')
 
         if observed:
             if tf > len(X):
                 t = np.arange(tmax, len(X)) - tX0
-                plt.scatter(t, X[tmax:], fc='g', ec='k', alpha=0.5, label='Observed data')
+                plt.scatter(dates[t], X[tmax:], fc='g', ec='k', alpha=0.5, label='Observed data')
             else:
                 t = np.arange(tmax, tf) - tX0
-                plt.scatter(t, X[tmax:tf], fc='g', ec='k', alpha=0.5, label='Observed data')
+                plt.scatter(dates[t], X[tmax:tf], fc='g', ec='k', alpha=0.5, label='Observed data')
 
         z_true = X[tX0:tmax]
         z_pred = z_med[tX0:tmax]
@@ -272,8 +283,11 @@ def plot_results(samples, ci=95, Y=False, Z=False, observed=False, label_size=12
         # Goodness of fit, r-square (square of pearson's coefficient)
         r2 = (stats.linregress(z_true, z_pred)[2]) ** 2
         plt.annotate(r'$r^{2}=%.6f$' % r2, xy=(0.85, 0.97), xycoords='axes fraction')
-        plt.xlabel(f"Days since first recovered+dead case ({samples['date'][tX0]})", fontsize=label_size)
+        plt.xlabel(f"Days since first recovered+dead case ({dates[tX0]})", fontsize=label_size)
         plt.ylabel("Number of new recovered+dead cases ($\mathbf{log_{10}}$)", fontsize=label_size)
+        plt.xticks(dates[np.arange(tX0, tf, 20)])
+        plt.tick_params(axis='x', labelsize=tick_size)
+        plt.tick_params(axis='y', labelsize=tick_size)
         plt.legend(loc='upper left')
         plt.title("Daily number of new dead and recovered cases %s" % samples['country'], fontsize=title_size, fontweight='bold')
 
@@ -369,7 +383,7 @@ def posteriors(samples, var, total=True):
         plt.show()
 
 
-def plot_summary(samples):
+def plot_summary(samples, label_size=14, tick_size=10, title_size=16):
     """
     Plot of trace, posterior for all parameters and chains
     """
@@ -390,9 +404,11 @@ def plot_summary(samples):
         ax[i, 1].set_ylabel('')
         titles = [f"Trace of {samples['names'][i]}", f"Posterior distribution of {samples['names'][i]}"]
         for k in range(2):
-            ax[i, k].set_xlabel('MCMC step')
-            ax[i, k].set_title(titles[k], weight='bold')
+            ax[i, k].set_title(titles[k], weight='bold', fontsize=title_size)
+            ax[i, k].tick_params(axis='x', labelsize=tick_size)
+            ax[i, k].tick_params(axis='y', labelsize=tick_size)
             ax[i, k].grid()
+    ax[-1, 0].set_xlabel('MCMC step', fontsize=label_size)
 
 
 """def plot_summary(samples):
