@@ -1,7 +1,7 @@
 import sys
 import pandas as pd
 import numpy as np
-sys.path.append('../../modules/')
+sys.path.append('../../../modules/')
 from analysis import Analysis
 from time import time
 import warnings
@@ -18,7 +18,7 @@ else:
     burn_in = float(sys.argv[4])
 
     # get data to fit
-    df = pd.read_csv('../../Data/dataset_esp.csv')
+    df = pd.read_csv('../../../Data/dataset_esp.csv')
 
     # instantiating an analysis object
     analysis = Analysis(date=df['Day'].to_numpy(),
@@ -56,7 +56,7 @@ else:
     t1 = time()
     # Save dictionary to file
     import pickle
-    file = open('../../Results/esp/results_after_peak_esp.pkl', 'wb')
+    file = open('../../../Results/esp/first_wave/results_after_peak_esp.pkl', 'wb')
     pickle.dump(results, file)
     file.close()
     print(f'{time() - t1:.4f}s')

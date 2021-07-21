@@ -19,6 +19,7 @@ else:
 
     # get data to fit
     df = pd.read_csv('../../../Data/dataset_esp.csv')
+    df = df[df.Day >= '2020.03.01'].reset_index(drop=True)
 
     # instantiating an analysis object
     analysis = Analysis(date=df['Day'].to_numpy(),
