@@ -19,10 +19,10 @@ else:
 
     # get data to fit
     df = pd.read_csv('../../../Data/dataset_fra.csv')
-    df = df[df.Day >= '2020.03.03']
+    df = df[df.date >= '2020.03.03']
 
     # instantiating an analysis object
-    analysis = Analysis(date=df['Day'].to_numpy(),
+    analysis = Analysis(date=df['date'].to_numpy(),
                         confirmed=df['Active_cases_smooth'].to_numpy(),
                         recovered_death=df['Recovered_Death_smooth'].to_numpy(),
                         confinement='2020.03.12',

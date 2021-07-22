@@ -22,7 +22,7 @@ else:
     df = pd.read_csv('../../../Data/dataset_ita.csv')
 
     # get the dictonary containing all parameters values
-    filehandler = open('../../../Results/ita/first_wave/results_before_peak_ita.pkl', 'rb')
+    filehandler = open('../../../Results/ita/first_wave/results_before_peak_ita_200000.pkl', 'rb')
     res = pickle.load(filehandler)
     # numeric solutino of SCIR system with median of parameters fitted 
     t, *states = solve_SCIR(res)
@@ -30,7 +30,7 @@ else:
     I, X = states[2][::100], states[3][::100]
 
     # instantiating an analysis object
-    analysis = Analysis(date=df['Day'][:len(I)],
+    analysis = Analysis(date=df['Day'],
                         confirmed=I,
                         recovered_death=X,
                         confinement='2020.03.09',

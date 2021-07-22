@@ -19,13 +19,13 @@ else:
 
     # get data to fit
     df = pd.read_csv('../../../Data/dataset_ita.csv')
-    df = df[df.Day > '2020.10.10'].reset_index(drop=True)
+    df = df[df.Day > '2020.08.18'].reset_index(drop=True)
 
     # instantiating an analysis object
     analysis = Analysis(date=df['Day'],
                         confirmed=df['Active_cases_smooth'].to_numpy(),
                         recovered_death=df['Recovered_Death_smooth'].to_numpy(),
-                        confinement='2020.11.06',
+                        confinement='2020.10.28',
                         last_data='2020.11.27',   # motivate choise
                         last_projection='2021.03.09',
                         peak='2020.11.27',

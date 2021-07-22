@@ -163,7 +163,7 @@ def end_epidemic_plot(samples, tlast, threshold=None, label_size=12, tick_size=1
     tmax = samples['tmax'] - 1
     fmt = '%Y.%m.%d'
     tlast = (dt.strptime(tlast, fmt) - dt.strptime(samples['date'][0], fmt)).days
-    dates = pd.to_datetime(samples['date'], format='%Y.%m.%d').strftime('%d/%m/%Y')
+    dates = pd.to_datetime(samples['date'], format='%Y.%m.%d').dt.strftime('%d/%m/%Y')
     Iq = samples['Iq']
     beta, rmu, p, q = samples['beta'], samples['rmu'], samples['p'], samples['q']
     # Filter out parameters with no confinement regime
@@ -205,7 +205,7 @@ def plot_results(samples, ci=95, Y=False, Z=False, observed=False, label_size=14
     tf = samples['tf']
     I_exact = infected_exact(samples) / np.log(10)
     _, b, c = samples['y'].shape
-    dates = pd.to_datetime(samples['date'], format='%Y.%m.%d').dt.strftime('%d/%m/%Y')
+    dates = pd.to_datetime(samples['date'], format='%Y.%m.%d').strftime('%d/%m/%Y')
 
     fig, ax = plt.subplots(figsize=(16, 8))
     plt.grid()
