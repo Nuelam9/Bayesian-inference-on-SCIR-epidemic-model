@@ -100,7 +100,7 @@ class Analysis:
         }
 
         idata = az.from_pyjags(self.samples)
-        param = az.summary(idata, round_to=4, var_names=['beta', 'rmu', 'q', 'p', 'tauI', 'tauX'],
+        param = az.summary(idata, round_to=6, var_names=['beta', 'rmu', 'q', 'p', 'tauI', 'tauX'],
                            stat_funcs=func_dict)
         self.idata = idata
         self.param = param
