@@ -9,13 +9,14 @@ warnings.filterwarnings('ignore')
 
 
 if len(sys.argv) < 5:
-    print("nchain (10), nthreads (10), niters (200000), burn_in (0.5)")
+    print("nchain (10), nthreads (10), niters (200000), thin(1), burn_in (0.5)")
 else:
     # getting number of iterations as command-line arguments 
     nchains = int(sys.argv[1])
     nthreads = int(sys.argv[2])
     niter = int(sys.argv[3])
-    burn_in = float(sys.argv[4])
+    thin = int(sys.argv[4])
+    burn_in = float(sys.argv[5])
 
     # get data to fit
     df = pd.read_csv('../../../Data/dataset_esp.csv')
@@ -37,7 +38,7 @@ else:
                         tauX=[0.01, 0.01])
 
     # call sampler analysis' method
-    analysis.sampler(nchains=nchains, nthreads=nthreads, niter=niter, burn_in=burn_in)
+    analysis.sampler(nchains=nchains, nthreads=nthreads, niter=niter, thin=thin, burn_in=burn_in)
     results = { **analysis.data, **analysis.samples,
             'date': analysis.date,
             'peak': analysis.peak,
@@ -51,13 +52,13 @@ else:
 
     print('\n')
     print('Summary:')
-    print(analysis.summary)
+    #print(analysis.summary)
 
     print("\nSaving simulation's results...")
     t1 = time()
     # Save dictionary to file
     import pickle
-    file = open(f'../../../Results/esp/first_wave/results_before_peak_esp_{niter}.pkl', 'wb')
+    file = open(f'../../../Results/esp/first_wave/results_before_peak_esp_{niter}_{thin}.pkl', 'wb')
     pickle.dump(results, file)
     file.close()
     print(f'{time() - t1:.4f}s')
