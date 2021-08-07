@@ -1,0 +1,24 @@
+(Slide 1)
+Vedere se cambiare titolo in "Probabilistic forecasting of Italy’s COVID-19 data".
+
+(Slide 2)
+
+
+(Slide 6)
+Scrivere data decritption, spiegando fatto del delay livello regionale e nazionale, quindi fatta una media mobile a 7 giorni (riguardarsi la definizione)
+
+
+(Silde 7)
+
+
+(Silde 9)
+aggiungere al plot la legenda per la mediana, solo alle posterior: "Parameters median on all chains"
+la mediana non restituisce il valore più probabile per per p e q (per quest'ultimo è più vicino rispetto a p)
+tabella con latex
+
+(Slide 10, e in tutte le altre in cui compaiono questi plot)
+Date e testo direttamente dal codice. Active cases -> log_(10)(I(t)), Number of new recovered+death cases -> log_10(10)(X(t))
+Se riesco mettere date asse x per Peak posterior e End epidemic e mettere data in numero
+
+(Slide 18)
+Scrivere per bene le conclusioni
