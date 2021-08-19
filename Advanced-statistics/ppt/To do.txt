@@ -1,7 +1,10 @@
+Codice
 Aggiungere testo nei plot da python. 
 Risolvere ode per tutti i parametri simulati. 
 Fare prova con PyMC3, quindi senza fare approssimazioni. 
 
+Speech
+R0 (R-Nought)
 
 Presentazione
 (Slide 1)
