@@ -1,3 +1,9 @@
+Aggiungere testo nei plot da python. 
+Risolvere ode per tutti i parametri simulati. 
+Fare prova con PyMC3, quindi senza fare approssimazioni. 
+
+
+Presentazione
 (Slide 1)
 Vedere se cambiare titolo in "Probabilistic forecasting of Italy’s COVID-19 data".
 
