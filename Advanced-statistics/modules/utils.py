@@ -1,3 +1,7 @@
+# To do
+# 1. Add function param type annotation
+
+
 import threading  # change trading cause is obsolete 
 import math
 import numpy as np
