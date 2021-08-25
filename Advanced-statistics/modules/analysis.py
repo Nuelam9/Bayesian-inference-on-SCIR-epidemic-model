@@ -1,12 +1,3 @@
-# To do:
-# 1. func plot_results()
-#    1.1 synthesize
-# 2. change in plot or where it comes:
-#    2.1 the evaluation of same things (waste of time)
-# 3. try to use numba also for I_exact (new version in prova_numba)
-# 4. Add type annotation (with pycharm)
-
-
 import numpy as np
 import pyjags as pj
 import arviz as az
@@ -62,7 +53,7 @@ class Analysis:
                          tauI0=self.tauI[0], tauI1=self.tauI[1], tauX0=self.tauX[0], tauX1=self.tauX[1],
                          I=I, X=X, I0=I0, Iq=Iq, t0=t0 + 1, tX0=tX0 + 1, tq=tq + 1, tmax=tmax + 1, tf=tf + 1)       
 
-    def sampler(self, nchains, nthreads, nchains_per_thread=1, niter=10000, nadapt=0, thin=1, burn_in=0.5):
+    def sampler(self, nchains: int, nthreads: int, nchains_per_thread=1, niter=10000, nadapt=0, thin=1, burn_in=0.5):
         # Create data attribute
         self.data_processing()
 
