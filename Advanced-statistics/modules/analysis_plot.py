@@ -1,7 +1,10 @@
 # To do:
 # 1. func plot_results()
 #    1.1 synthesize
-# 2. Add type annotation (with pycharm) 
+# 2. change in plot or where it comes:
+#    2.1 the evaluation of same things (waste of time)
+# 3. try to use numba also for I_exact (new version in prova_numba)
+# 2. Add type annotation
 
 
 import numpy as np
@@ -50,7 +53,7 @@ def trim_axs(axs, n):
     return axs[:n]
 
 
-def autocorrelation_time(samples, nlags=1000):
+def autocorrelation_time(samples: dict, nlags=1000):
     def fit_time(x, tau):
         return np.exp(-x / tau)
 
@@ -64,7 +67,7 @@ def autocorrelation_time(samples, nlags=1000):
     return times
 
 
-def autocorrelation_time_plot(samples):
+def autocorrelation_time_plot(samples: dict):
     times = autocorrelation_time(samples)
     n = len(samples['names'])
     fig, ax = plt.subplots(n, figsize=(10, 10), constrained_layout=True)
@@ -74,7 +77,7 @@ def autocorrelation_time_plot(samples):
         ax[i].grid()
 
 
-def autocorr_fit_plot(samples, var, total=True, xmin=-10, xmax=200):
+def autocorr_fit_plot(samples: dict, var: str, total=True, xmin=-10, xmax=200):
     # Acf fit plot of one variable and all chains
     if samples['nchains'] == 12:
         rows, cols = 4, 3
@@ -99,7 +102,7 @@ def autocorr_fit_plot(samples, var, total=True, xmin=-10, xmax=200):
         ax.set_title(f"Autocorrelation fit for {samples['names'][ind]} of Chain {j + 1}", weight='bold')
 
 
-def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False, label_size=12, tick_size=10):
+def peak_posterior(samples: dict, nthreads=cpu_count() - 2, binwidth=10, offset=3, second_wave=False, label_size=12, tick_size=10):
     beta, rmu, p, q = samples['beta'], samples['rmu'], samples['p'], samples['q']
     # Filter out parameters with no confinement regime
     mask = rmu * (p + q) > beta * p
@@ -149,7 +152,7 @@ def peak_posterior(samples, nthreads=cpu_count() - 2, binwidth=10, offset=3, sec
     return t_peak
 
 
-def end_epidemic_plot(samples, tlast, threshold=None, label_size=12, tick_size=10):
+def end_epidemic_plot(samples: dict, tlast: str, threshold=None, label_size=12, tick_size=10):
     if threshold is None:
         if samples['country'] == 'Italy':
             threshold = 1200.
@@ -198,7 +201,7 @@ def end_epidemic_plot(samples, tlast, threshold=None, label_size=12, tick_size=1
     plt.grid()
 
 
-def plot_results(samples, ci=95, Y=False, Z=False, observed=False, label_size=14, tick_size=10, title_size=16):
+def plot_results(samples: dict, ci=95, Y=False, Z=False, observed=False, label_size=14, tick_size=10, title_size=16):
     t0 = samples['t0'] - 1
     tmax = samples['tmax'] - 1
     tX0 = samples['tX0'] - 1
@@ -292,7 +295,7 @@ def plot_results(samples, ci=95, Y=False, Z=False, observed=False, label_size=14
         plt.title("Daily number of new dead and recovered cases %s" % samples['country'], fontsize=title_size, fontweight='bold')
 
 
-def trace_plot(samples, var, total=True, title_size=16):
+def trace_plot(samples: dict, var: str, total=True, title_size=16):
     ind = np.where(samples['varname'] == var)[0][0]
     samples_size = int(samples['niter'] * samples['burn_in'])
     if not total:
@@ -339,7 +342,7 @@ def trace_plot(samples, var, total=True, title_size=16):
         plt.show()
 
     
-def posteriors(samples, var, total=True):
+def posteriors(samples: dict, var: str, total=True):
     ind = np.where(samples['varname'] == var)[0][0]
     exp = 1
     if (var == 'tauX') | (var == 'tauI'):
@@ -383,58 +386,53 @@ def posteriors(samples, var, total=True):
         plt.show()
 
 
-def plot_summary(samples, label_size=14, tick_size=10, title_size=16):
-    """
-    Plot of trace, posterior for all parameters and chains
-    """
-    fig, ax = plt.subplots(6, 2, figsize=(12, 12), constrained_layout=True)
-    samples_size = int(samples['niter'] * samples['burn_in'])
-    for i in range(len(samples['varname'])):
-        exp = 1
-        if (samples['varname'][i] == 'tauI') | (samples['varname'][i] == 'tauX'):
-            exp = - 1 / 2
-        for j in range(samples['nchains']):
-            var_chain = np.power(samples[samples['varname'][i]][0, :, j], exp)
-            var_chains = np.power(samples[samples['varname'][i]].ravel(), exp)
-            ax[i, 0].plot(var_chain, label=f'Chain {j + 1}', lw=1)
-            sns.distplot(var_chain, hist=False, kde=True, ax=ax[i, 1])
+def plot_summary(samples: dict, without_acf=True, label_size=14, tick_size=10, title_size=16):
+    # Plot of trace, posterior for all parameters and chains
+    if without_acf:
+        _, ax = plt.subplots(6, 2, figsize=(12, 12), constrained_layout=True)
+        samples_size = int(samples['niter'] * samples['burn_in'])
+        for i in range(len(samples['varname'])):
+            exp = 1
+            if (samples['varname'][i] == 'tauI') | (samples['varname'][i] == 'tauX'):
+                exp = - 1 / 2
+            for j in range(samples['nchains']):
+                var_chain = np.power(samples[samples['varname'][i]][0, :, j], exp)
+                var_chains = np.power(samples[samples['varname'][i]].ravel(), exp)
+                ax[i, 0].plot(var_chain, label=f'Chain {j + 1}', lw=1)
+                sns.distplot(var_chain, hist=False, kde=True, ax=ax[i, 1])
 
-        ax[i, 0].plot([np.median(var_chains)] * samples_size, c='r', lw=2, label='Median')
-        ax[i, 1].axvline(np.median(var_chains), color='r', lw=1, label='Actual epidemic peak')
-        ax[i, 1].set_ylabel('')
-        titles = [f"Trace of {samples['names'][i]}", f"Posterior distribution of {samples['names'][i]}"]
-        for k in range(2):
-            ax[i, k].set_title(titles[k], weight='bold', fontsize=title_size)
-            ax[i, k].tick_params(axis='x', labelsize=tick_size)
-            ax[i, k].tick_params(axis='y', labelsize=tick_size)
-            ax[i, k].grid()
-    ax[-1, 0].set_xlabel('MCMC step', fontsize=label_size)
+            ax[i, 0].plot([np.median(var_chains)] * samples_size, c='r', lw=2, label='Median')
+            ax[i, 1].axvline(np.median(var_chains), color='r', lw=1, label='Actual epidemic peak')
+            ax[i, 1].set_ylabel('')
+            titles = [f"Trace of {samples['names'][i]}", f"Posterior distribution of {samples['names'][i]}"]
+            for k in range(2):
+                ax[i, k].set_title(titles[k], weight='bold', fontsize=title_size)
+                ax[i, k].tick_params(axis='x', labelsize=tick_size)
+                ax[i, k].tick_params(axis='y', labelsize=tick_size)
+                ax[i, k].grid()
+        ax[-1, 0].set_xlabel('MCMC step', fontsize=label_size)
+    # Plot of trace, posterior, acf, for all parameters and chains
+    else:
+        _, ax = plt.subplots(6, 3, figsize=(15, 12), constrained_layout=True)
+        samples_size = int(samples['niter'] * samples['burn_in'])
+        for i in range(len(samples['varname'])):
+            exp = 1
+            if (samples['varname'][i] == 'tauI') | (samples['varname'][i] == 'tauX'):
+                exp = - 1 / 2
+            for j in range(samples['nchains']):
+                var_chain = np.power(samples[samples['varname'][i]][0, :, j], exp)
+                var_chains = np.power(samples[samples['varname'][i]].ravel(), exp)
+                ax[i, 0].plot(var_chain, label=f'Chain {j + 1}', lw=1)
+                sns.distplot(var_chain, hist=False, kde=True, ax=ax[i, 1])
+                ax[i, 2].plot(acf(var_chain, fft=True, nlags=100))
 
-
-"""def plot_summary(samples):
-    """
-#Plot of trace, posterior, acf, for all parameters and chains
-"""
-    fig, ax = plt.subplots(6, 3, figsize=(15, 12), constrained_layout=True)
-    samples_size = int(samples['niter'] * samples['burn_in'])
-    for i in range(len(samples['varname'])):
-        exp = 1
-        if (samples['varname'][i] == 'tauI') | (samples['varname'][i] == 'tauX'):
-            exp = - 1 / 2
-        for j in range(samples['nchains']):
-            var_chain = np.power(samples[samples['varname'][i]][0, :, j], exp)
-            var_chains = np.power(samples[samples['varname'][i]].ravel(), exp)
-            ax[i, 0].plot(var_chain, label=f'Chain {j + 1}', lw=1)
-            sns.distplot(var_chain, hist=False, kde=True, ax=ax[i, 1])
-            ax[i, 2].plot(acf(var_chain, fft=True, nlags=100))
-
-        ax[i, 0].plot([np.median(var_chains)] * samples_size, c='r', lw=2, label='Median')
-        ax[i, 1].axvline(np.median(var_chains), color='r', lw=1, label='Actual epidemic peak')
-        ax[i, 1].set_ylabel('')
-        ax[i, 2].set_xlabel('Lag')
-        titles = [f"Trace of {samples['names'][i]}", f"Posterior distribution of {samples['names'][i]}",
-                  f"Acf of {samples['names'][i]}"]
-        for k in range(3):
-            ax[i, k].set_xlabel('MCMC step')
-            ax[i, k].set_title(titles[k], weight='bold')
-            ax[i, k].grid()"""
+            ax[i, 0].plot([np.median(var_chains)] * samples_size, c='r', lw=2, label='Median')
+            ax[i, 1].axvline(np.median(var_chains), color='r', lw=1, label='Actual epidemic peak')
+            ax[i, 1].set_ylabel('')
+            ax[i, 2].set_xlabel('Lag')
+            titles = [f"Trace of {samples['names'][i]}", f"Posterior distribution of {samples['names'][i]}",
+                    f"Acf of {samples['names'][i]}"]
+            for k in range(3):
+                ax[i, k].set_xlabel('MCMC step')
+                ax[i, k].set_title(titles[k], weight='bold')
+                ax[i, k].grid()        
