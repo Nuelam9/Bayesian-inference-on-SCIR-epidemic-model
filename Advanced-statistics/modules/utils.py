@@ -6,27 +6,39 @@ import threading  # change trading cause is obsolete
 import math
 import numpy as np
 from numba import jit
+from numpy.core.defchararray import array
 from scipy.integrate import odeint
+from typing import Dict, Tuple
 
 
-def func_np(beta, rmu, p, q):
+def fit_time(x: np.array, tau: float) -> np.array:
+    return np.exp(-x / tau)
+
+
+def peak_posterior_np(beta: np.ndarray, rmu: np.ndarray, 
+            p: np.ndarray, q: np.ndarray) -> np.ndarray:
     """
     Control function using Numpy.
     """
     return 1 / (p + q) * np.log(beta * q / (rmu * (p + q) - beta * p))
 
 
-# nopython: (compilation mode) compile the decorated function so that it will run 
-# entirely without the involvement of the Python interpreter (best performance)
-# nogil: release GIL (global interpreter lock) allowing you to take advantage of multi-core systems
+# nopython: (compilation mode) compile the decorated function 
+# so that it will run 
+# entirely without the involvement of the Python interpreter
+# (best performance)
+# nogil: release GIL (global interpreter lock) allowing you to take 
+# advantage of multi-core systems
 @jit('void(double[:], double[:], double[:], double[:], double[:])',
      nopython=True, nogil=True)
-def peak_time_nb(result, beta, rmu, p, q):
+def peak_posterior_nb(result, beta, rmu, p, q):
     """
     Function under test.
     """
     for i in range(len(result)):
-        result[i] = 1 / (p[i] + q[i]) * math.log(beta[i] * q[i] / (rmu[i] * (p[i] + q[i]) - beta[i] * p[i]))
+        result[i] = 1 / (p[i] + q[i]) * math.log(beta[i] * q[i] /
+                                                 (rmu[i] * (p[i] + q[i]) 
+                                                 - beta[i] * p[i]))
 
 
 @jit('void(double[:], double[:,:], double, double)',
@@ -75,7 +87,7 @@ def make_multithread(inner_func, numthreads):
     return func_mt
 
 
-def rounding(med, std):
+def rounding(med: float, std: float) -> Tuple[float, float]:
     dim = len(str(int(med)))
     prec = len(str(int(std)))
     med_round = int(round(med / 10 ** dim, prec) * 10 ** dim)
@@ -83,7 +95,7 @@ def rounding(med, std):
     return med_round, std_round
 
 
-def infected_exact(samples):
+def infected_exact(samples: Dict) -> np.array:
     I0 = samples['I0']
     Iq = samples['Iq']
     t0 = samples['t0'] - 1
@@ -99,13 +111,15 @@ def infected_exact(samples):
     t = np.arange(t0, tf)
     I = np.zeros(tf - t0, dtype=np.float64)
     I[:tq] = I0 + (beta - rmu) * (t[:tq] - t0)
-    I[tq:] = Iq + ((beta * q) / (p + q) ** 2 * (1 - np.exp(-(p + q) * (t[tq:] - tq))) +
-                    (beta - rmu - beta * q / (q + p)) * (t[tq:] - tq))
+    I[tq:] = Iq + ((beta * q) / (p + q) ** 2
+                   * (1 - np.exp(-(p + q) * (t[tq:] - tq))) 
+                   + (beta - rmu - beta * q / (q + p)) * (t[tq:] - tq))
     return I
 
 
 # The SCIR model differential equations
-def SCIR(state, t, N, beta, q, p, rmu):
+def SCIR(state: np.array, t: float, N: float, beta: float, q: float, p: float, 
+         rmu: float) -> Tuple[np.array, np.array, np.array, np.array]:
     """
     return: dSdt, dCdt, dIdt, dXdt (Derivatives)
     """
@@ -117,11 +131,12 @@ def SCIR(state, t, N, beta, q, p, rmu):
             rmu * I)
 
 
-def solve_SCIR(samples, step=0.01, tf=None):
+def solve_SCIR(samples: Dict, step: float = 0.01, tf=None) -> np.ndarray:
     """
-    Numerical solution of SCIR model with chosen parameters (median posteriors).
-    This data is fitted to show less (but still big) width area of predictive
-    posterior interval
+    Numerical solution of SCIR model with chosen parameters 
+    (median posteriors).
+    This data is fitted to show less (but still big) width area of 
+    predictive posterior interval.
     """
     # Total population, N
     if samples['country'] == 'Spain':
@@ -148,10 +163,14 @@ def solve_SCIR(samples, step=0.01, tf=None):
     S0 = N - I0 - X0
     C0 = 0.
     state0 = np.array([S0, C0, I0, X0])
-    # Integrate the SCIR equations over a time grid before confinement (first regime)
+    # Integrate the SCIR equations over a time grid before confinement 
+    # (first regime)
     t = np.arange(t0, tf, step)
-    ret1 = odeint(SCIR, state0, t[:int(tq / step)], args=(N, beta, q * 0, p * 0, rmu))
-    # Integrate the SCIR equations over a time grid, after confinement (second regime)
-    ret2 = odeint(SCIR, ret1[-1, :], t[int(tq / step):], args=(N, beta, q, p, rmu))
+    ret1 = odeint(SCIR, state0, t[:int(tq / step)], 
+                  args=(N, beta, q * 0, p * 0, rmu))
+    # Integrate the SCIR equations over a time grid, after confinement 
+    # (second regime)
+    ret2 = odeint(SCIR, ret1[-1, :], t[int(tq / step):], 
+                  args=(N, beta, q, p, rmu))
     ret = np.concatenate((ret1, ret2))
     return np.column_stack((t, ret)).T
