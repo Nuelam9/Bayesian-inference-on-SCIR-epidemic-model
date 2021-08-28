@@ -29,7 +29,7 @@ class Analysis:
                                r'$ \mathbf{\sigma_{X}} $',
                                r'$ \mathbf{\sigma_{I}} $'])
 
-    def data_processing(self):
+    def data_processing(self) -> None:
         # Active cases in logarithmic scale
         I = np.log(self.confirmed)
         # New deaths+recovered (daily derivative) in logarithmic scale
@@ -70,7 +70,7 @@ class Analysis:
         # Create data attribute
         self.data_processing()
 
-        # Construct JAGS Model
+        # Import JAGS Model from .txt file
         jags_model = open('../../../modules/model', 'r').read()
         model = pj.Model(code=jags_model,
                          data=self.data,
@@ -93,7 +93,8 @@ class Analysis:
         self.samples = samples
 
     @property
-    def summary(self):
+    def summary(self) -> pd.DataFrame:
+
         def median_sd(x: np.array) -> float:
             median = np.percentile(x, 50)
             sd = np.sqrt(np.mean((x - median) ** 2))
@@ -110,8 +111,8 @@ class Analysis:
         param = az.summary(idata, round_to=6, var_names=['beta', 'rmu', 'q', 
                                                          'p', 'tauI', 'tauX'],
                            stat_funcs=func_dict)
-        self.idata = idata
-        self.param = param
+        self.idata = idata # To do: remove from attributes? (prob yes) 
+        self.param = param # same question
         return param[['median', 'sd', '2.5%_hdi', '97.5%_hdi', 'r_hat']]
 
 # import pickle
