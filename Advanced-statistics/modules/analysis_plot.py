@@ -8,7 +8,6 @@
 
 
 import numpy as np
-from numpy.core.records import array
 import pandas as pd
 import pyjags as pj
 from scipy import stats
@@ -56,7 +55,7 @@ def trim_axs(axs: np.ndarray) -> np.array:
     return axs[:n]
 
 
-def autocorrelation_time(samples: dict, nlags=1000) -> np.ndarray:
+def autocorrelation_time(samples: dict, nlags: int = 1000) -> np.ndarray:
     nchains = samples['nchains']
     nvars = len(samples['varname'])
     times = np.zeros((nchains, nvars))
@@ -172,8 +171,11 @@ def peak_posterior_plot(samples: dict, nthreads: int = cpu_count() - 2,
     plt.grid()
 
 
-def end_epidemic_plot(samples: dict, tlast: str, threshold=None, 
-                      label_size=12, tick_size=10):
+def end_epidemic_plot(samples: dict, tlast: str, threshold: int = None, 
+                      label_size: int = 12, tick_size: int = 10) -> None:
+    """
+ 
+    """
     if threshold is None:
         if samples['country'] == 'Italy':
             threshold = 1200.
@@ -202,7 +204,6 @@ def end_epidemic_plot(samples: dict, tlast: str, threshold=None,
               (beta - rmu - beta * q / (q + p)) * (t - tq))
     # Compute times until the number of confirmed cases falls below threshold 
     # for the first time 
-    # Numba function
 
     length = I.shape[1]
     times = np.empty(length, dtype=np.float64)
@@ -339,10 +340,12 @@ def plot_results(samples: dict, ci: int = 95, Y: bool = False,
         plt.tick_params(axis='y', labelsize=tick_size)
         plt.legend(loc='upper left')
         plt.title(f"Daily number of new dead and recovered cases \
-                  {samples['country']}", fontsize=title_size, fontweight='bold')
+                  {samples['country']}", fontsize=title_size, 
+                  fontweight='bold')
 
 
-def trace_plot(samples: dict, var: str, total=True, title_size=16):
+def trace_plot(samples: dict, var: str, total: bool = True,
+               title_size: int = 16) -> None:
     ind = np.where(samples['varname'] == var)[0][0]
     samples_size = int(samples['niter'] * samples['burn_in'])
     if not total:

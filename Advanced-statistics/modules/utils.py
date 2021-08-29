@@ -1,5 +1,8 @@
 # To do
 # 1. Add function param type annotation
+#   1.1 make_singlethread, make_multithread
+# 2. Change how compute epidemic end, root finding is better, cause 
+#    in future solve numerically ode system 
 
 
 import threading  # change trading cause is obsolete 
@@ -7,7 +10,7 @@ import math
 import numpy as np
 from numba import jit
 from scipy.integrate import odeint
-from typing import Dict, Tuple
+from typing import Tuple
 
 
 def fit_time(x: np.array, tau: float) -> np.array:
@@ -15,23 +18,24 @@ def fit_time(x: np.array, tau: float) -> np.array:
 
 
 def peak_posterior_np(beta: np.ndarray, rmu: np.ndarray, 
-            p: np.ndarray, q: np.ndarray) -> np.ndarray:
+                      p: np.ndarray, q: np.ndarray) -> np.ndarray:
     """
     Control function using Numpy.
     """
     return 1 / (p + q) * np.log(beta * q / (rmu * (p + q) - beta * p))
 
 
-# nopython: (compilation mode) compile the decorated function 
-# so that it will run 
-# entirely without the involvement of the Python interpreter
-# (best performance)
-# nogil: release GIL (global interpreter lock) allowing you to take 
-# advantage of multi-core systems
 @jit('void(double[:], double[:], double[:], double[:], double[:])',
      nopython=True, nogil=True)
-def peak_posterior_nb(result, beta, rmu, p, q):
+def peak_posterior_nb(result: float, beta: float, 
+                      rmu: float, p: float, q: float) -> None:
     """
+    nopython: (compilation mode) compile the decorated function 
+              so that it will run entirely without the involvement of 
+              the Python interpreter (best performance)
+    nogil: release GIL (global interpreter lock) allowing you to take 
+           advantage of multi-core systems
+
     Function under test.
     """
     for i in range(len(result)):
@@ -42,11 +46,12 @@ def peak_posterior_nb(result, beta, rmu, p, q):
 
 @jit('void(double[:], double[:,:], double, double)',
       nopython=True, nogil=True)
-def epidemic_end(times, I, threshold, tmax):
+def epidemic_end(times: np.array, I:np.ndarray, threshold: float, tmax: float):
     """
     Function under test.
     """
-    for i in range(len(times)):
+    lenght = len(times)
+    for i in range(lenght):
         times[i] = np.argmax(I[:, i] < np.log(threshold)) + tmax
 
 
@@ -94,7 +99,7 @@ def rounding(med: float, std: float) -> Tuple[float, float]:
     return med_round, std_round
 
 
-def infected_exact(samples: Dict) -> np.array:
+def infected_exact(samples: dict) -> np.array:
     I0 = samples['I0']
     Iq = samples['Iq']
     t0 = samples['t0'] - 1
@@ -130,7 +135,8 @@ def SCIR(state: np.array, t: float, N: float, beta: float, q: float, p: float,
             rmu * I)
 
 
-def solve_SCIR(samples: Dict, step: float = 0.01, tf=None) -> np.ndarray:
+def solve_SCIR(samples: dict, step: float = 0.01, 
+               tf: int = None) -> np.ndarray:
     """
     Numerical solution of SCIR model with chosen parameters 
     (median posteriors).

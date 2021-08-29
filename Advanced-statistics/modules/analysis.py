@@ -1,7 +1,11 @@
+# When implemented numerical solution with parameteres infered
+# track on y, z can be removed, so saving memory iters can be higher
+
 import numpy as np
 import pyjags as pj
 import arviz as az
 from datetime import datetime as dt
+import pandas as pd
 
 
 class Analysis:
