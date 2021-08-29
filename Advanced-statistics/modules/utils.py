@@ -6,7 +6,6 @@ import threading  # change trading cause is obsolete
 import math
 import numpy as np
 from numba import jit
-from numpy.core.defchararray import array
 from scipy.integrate import odeint
 from typing import Dict, Tuple
 
