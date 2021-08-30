@@ -10,7 +10,7 @@ import math
 import numpy as np
 from numba import jit
 from scipy.integrate import odeint
-from typing import Tuple
+from typing import Tuple, Callable
 
 
 def fit_time(x: np.array, tau: float) -> np.array:
@@ -55,7 +55,7 @@ def epidemic_end(times: np.array, I:np.ndarray, threshold: float, tmax: float):
         times[i] = np.argmax(I[:, i] < np.log(threshold)) + tmax
 
 
-def make_singlethread(inner_func):
+def make_singlethread(inner_func: Callable) -> Callable:
     """
     Run the given function inside a single thread.
     """
@@ -67,7 +67,7 @@ def make_singlethread(inner_func):
     return func
 
 
-def make_multithread(inner_func, numthreads):
+def make_multithread(inner_func: Callable, numthreads: int) -> Callable:
     """
     Run the given function inside *numthreads* threads, splitting
     its arguments into equal-sized chunks.
@@ -125,7 +125,7 @@ def infected_exact(samples: dict) -> np.array:
 def SCIR(state: np.array, t: float, N: float, beta: float, q: float, p: float, 
          rmu: float) -> Tuple[np.array, np.array, np.array, np.array]:
     """
-    return: dSdt, dCdt, dIdt, dXdt (Derivatives)
+    Compute dSdt, dCdt, dIdt, dXdt (Derivatives)
     """
     # Unpack the state vector
     S, C, I, X = state
