@@ -119,14 +119,6 @@ class Analysis:
         self.param = param # same question
         return param[['median', 'sd', '2.5%_hdi', '97.5%_hdi', 'r_hat']]
 
-# import pickle
-##' Save class object (Italy)
-# file_ita = open('results_ita.pkl', 'wb')
-# pickle.dump(analysis_ita, file_ita)
-# file_ita.close()
-## Load class object (Italy)
-# filehandler_ita = open('results_ita.pickle', 'rb')
-# object_ita = pickle.load(filehandler_ita)
 ## Check if two dict samples are the same (print elements different)
 # {k: object_try.samples[k] for k in object_try.samples if k in analysis_ita.samples and
 # np.all(object_try.samples[k] != analysis_ita.samples[k])}
