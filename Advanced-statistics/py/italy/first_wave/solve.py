@@ -46,7 +46,7 @@ def SCIR(state: np.array, t: float, N: float, beta: float, q: float, p: float,
 
 def solve_SCIR(param: tuple, res_path: str = '../../../Results/ita/first_wave'
                + '/solve_res/',
-               step: float = 0.01) -> np.ndarray:
+               step: float = 0.01) -> None:
         beta, rmu, p, q = param
         # Initial conditions for the first regime
         S0 = N - I0 - X0
