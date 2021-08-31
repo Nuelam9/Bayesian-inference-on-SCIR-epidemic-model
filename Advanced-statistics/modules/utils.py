@@ -9,6 +9,7 @@ import threading  # change trading cause is obsolete
 import math
 import numpy as np
 from numba import jit
+import pickle
 from scipy.integrate import odeint
 from typing import Tuple, Callable
 
@@ -121,18 +122,29 @@ def infected_exact(samples: dict) -> np.array:
     return I
 
 
+def get_data(file: str) -> dict:
+        """
+        Load data from .pkl file and extract only useful data
+        """
+        file_handler = open(file, 'rb')
+        samples = pickle.load(file_handler)
+        return samples    
+
+
 # The SCIR model differential equations
 def SCIR(state: np.array, t: float, N: float, beta: float, q: float, p: float, 
-         rmu: float) -> Tuple[np.array, np.array, np.array, np.array]:
-    """
-    Compute dSdt, dCdt, dIdt, dXdt (Derivatives)
-    """
-    # Unpack the state vector
-    S, C, I, X = state
-    return (-beta / N * I * S - q * S + p * C,
-            q * S - p * C,
-            beta / N * I * S - rmu * I,
-            rmu * I)
+        rmu: float) -> Tuple[np.array, np.array, np.array, np.array]:
+        """
+        Compute dSdt, dCdt, dIdt, dXdt (Derivatives)
+        """
+        # Unpack the state vector
+        S, C, I, X = state
+        return (
+                -beta / N * I * S - q * S + p * C,
+                q * S - p * C,
+                beta / N * I * S - rmu * I,
+                rmu * I
+                )
 
 
 def solve_SCIR(samples: dict, step: float = 0.01, 
