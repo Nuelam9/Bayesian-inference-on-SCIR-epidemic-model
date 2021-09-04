@@ -158,7 +158,7 @@ def peak_posterior_plot(samples: dict, nthreads: int = cpu_count() - 2,
     ax.axvline(samples['tq'], color='gray', linestyle='--')
     ax.axvline(samples['tmax'], color='gray', linestyle='--')
     # vertical dashed lines for confinement and last data fitted
-    y_lim = ax.get_ylim()[1] / 3
+    _, y_lim = ax.get_ylim() / 3
     ax.text(samples['tq'] - offset, y_lim, string, rotation=90)
     ax.text(samples['tmax'] - offset, y_lim,
             'Last data point fitted', rotation=90)
