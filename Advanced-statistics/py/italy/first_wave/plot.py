@@ -78,7 +78,7 @@ if __name__ == '__main__':
     for lin in [True, False]:
         for file in files:
             plot_sol.sol_plot(sol_path + file, 
-                            path + 'plot/ode_sol/',
-                            lin,
-                            dates, 
-                            sol_dates)
+                              path + 'plot/ode_sol/',
+                              lin,
+                              dates, 
+                              sol_dates)
