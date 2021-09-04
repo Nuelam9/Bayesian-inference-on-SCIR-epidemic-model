@@ -6,12 +6,12 @@ model {
     }
     # Regression for active cases post-confinement (populations are in log scale)
     for(t in (tq + 1):tmax) {
-        I[t] ~ dnorm(Iq + ((beta * q) / (p + q)^2 * (1 - exp(-(p + q) * (t - tq))) +
-                    (beta - rmu - beta * q / (q + p))*(t - tq)), tauI)
+        I[t] ~ dnorm(Iq + ((beta * q) / (p + q) ^ 2 * (1 - exp(-(p + q) * (t - tq))) +
+                    (beta - rmu - beta * q / (q + p)) * (t - tq)), tauI)
     }
     # Posterior predictive for active cases post-confinement (extended until tf)
     for(t in (tq + 1):tf) {
-        y[t] ~ dnorm(y[tq] + ((beta * q)/(p + q)^2 * (1 - exp(-(p + q) * (t - tq))) +
+        y[t] ~ dnorm(y[tq] + ((beta * q) / (p + q) ^ 2 * (1 - exp(-(p + q) * (t - tq))) +
                     (beta - rmu - beta * q / (q + p)) * (t - tq)), tauI)
     }
     # Regression for new death+recovered cases
