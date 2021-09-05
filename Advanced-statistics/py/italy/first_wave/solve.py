@@ -59,7 +59,7 @@ class Ode_system_solver:
                 # Integrate the SCIR equations over a time grid, after
                 # confinement (second regime)
                 ret2 = odeint(SCIR, ret1[-1, :], t[int(tq / step):], 
-                                args=(N, beta, q, p, rmu))
+                              args=(N, beta, q, p, rmu))
                 ret = np.concatenate((ret1, ret2))
                 # S, C, I, X
                 return ret[:, ind]        
