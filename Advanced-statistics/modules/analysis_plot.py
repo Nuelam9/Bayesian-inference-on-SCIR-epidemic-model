@@ -251,8 +251,8 @@ def plot_results(samples: dict, ci: int = 95, Y: bool = False,
     if Y:
         I = samples["I"] / np.log(10)
         y = samples["y"].reshape(tf, b * c)
-        y1 = np.percentile(y, (100 + ci) / 2, axis=1) / np.log(10)
-        y2 = np.percentile(y, (100 - ci) / 2, axis=1) / np.log(10)
+        y1 = np.percentile(y, (100. + ci) / 2., axis=1) / np.log(10)
+        y2 = np.percentile(y, (100. - ci) / 2., axis=1) / np.log(10)
 
         t = np.arange(t0, tmax) - t0
         plt.scatter(dates[t], I[t0:tmax], fc='w', ec='k', label='Fitted data')
