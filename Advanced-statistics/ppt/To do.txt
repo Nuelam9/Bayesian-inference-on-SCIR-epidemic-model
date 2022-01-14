@@ -1,14 +1,12 @@
 Codice
 Aggiungere testo nei plot da python. 
-Risolvere ode per tutti i parametri simulati. 
-Fare prova con PyMC3, quindi senza fare approssimazioni. 
+Risolvere ode per tutti i parametri simulati (fatto). 
+Fare prova con PyMC3, quindi senza fare approssimazioni (butta males). 
 
 Speech
-R0 (R-Nought)
+Tradurre in inglese il discorso, e R0 (R-Nought)
 
 Presentazione
-(Slide 1)
-Vedere se cambiare titolo in "Probabilistic forecasting of Italy’s COVID-19 data".
 
 (Slide 2)
 
@@ -28,6 +26,10 @@ tabella con latex
 (Slide 10, e in tutte le altre in cui compaiono questi plot)
 Date e testo direttamente dal codice. Active cases -> log_(10)(I(t)), Number of new recovered+death cases -> log_10(10)(X(t))
 Se riesco mettere date asse x per Peak posterior e End epidemic e mettere data in numero
+
+(Slide 10 e in tutte quelle in cui ci sono distribuzioni di t_peak e end_epidemic)
+Fare fit e riportare valore più probabile con relativo errore
+
 
 (Slide 18)
 Scrivere per bene le conclusioni
