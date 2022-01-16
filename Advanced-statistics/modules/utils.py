@@ -12,6 +12,7 @@ from numba import jit
 import pickle
 from scipy.integrate import odeint
 from typing import Tuple, Callable
+from timeit import Timer
 
 
 def fit_time(x: np.array, tau: float) -> np.array:
