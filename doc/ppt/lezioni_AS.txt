@@ -1,0 +1,24 @@
+1-  Introduzione alla probabilità e teorema di Bayes; 00:58:58; 13.
+2-  Continuo teorema di Bayes e inferenza statistica; 00:00:00; 12.	
+3-  Precisione inferenza statistica, funzione caratteristica e cumulanti; 01:11:58; 14
+4-  Applicazioni funzione caratteristica, Probability-Generating Function ; 00:00:00; 15
+5-  Moment-Generating Function, Transformation of random variables (audio) ; 01:12:46; 12
+6-  Randomization of distribution parameters, Rare value distribution, Large number law; 01:23:34; 15
+7-  Tchebichev lemma, Large number law proof, Central limit distribution (with convolution); 00:46:10; 8
+8-  Central limit distribution proof, Generalized Central limit theorem; 00:58:19; 14
+9-  Stability of distribution function, Multiplicative processes and Log normal distribution, Large Deviation Theory and Cramer's function introduction; 00:40:07; 7
+10- Large Deviation Theory and Cramer's function; 01:01:48; 11
+11- Extreme Events; 01:07:18; 13
+12- Non parametric statistics, Estimation of parameters; 01:00:08; 11
+13- Estimation of parameters - Maximum likelihood estimation, Censored data (time, order, random), Ranked Set Sampling, Random variable types; 01:10:40; 10
+14- Nonparametric Tests, testing for normality (The Skewness and Kurtosis Test for Normality, The Kolmogorov-Smirnov one-sample test); 00:52:50; 10
+15- Stationarity, The Dickey-Fueller test; 01:07:15; 11
+16- Nonparametric Tests, Testing for Comparing Two Related Samples (The Wilcoxon signed rank test, The Sign Test); 00:55:02; 10
+17- Parametric (t student) and Nonparametric (The U-Mann-Whitney, The two samples’ Kolmogorov-Smirnov test) Tests; 00:51:54; 12
+18- Nonparametric Tests, Testing for Comparing more than Two Related (paired) and not-Related (unpaired) Samples, Test for comparing ordinal and dichotomous variables, The Spearman rank-order correlation test, The Point-biserial and biserial test, The test for randomness: the run test); 00:52:43; 12
+19- Nonparametric Tests -Test for nominal scale data (The chi-square goodness of fit test, chi-square test for independence, Fisher exact test); 01:05:55; 14
+20- Information Theory (introduction to Shannon entropy, The Kullback-Leibler distance); 01:10:04; 12
+21- Information Theory (a complexity measure, the Klimontovich’ S-Theorem); 01:02:06; 12
+22- Information Theory (Mutual Information and Correlation, Causality, Transfer Entropy); 01:05:24; 12
+23- Information Theory (Maximum Entropy Method: discrete distributions); 00:37:24; 10
+24- Information Theory (Maximum Entropy Method: connection to thermodynamics, Bose-Einstein distribution, continuous distribution); 00:43:15; 11
