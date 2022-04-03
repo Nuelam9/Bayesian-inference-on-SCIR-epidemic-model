@@ -286,7 +286,7 @@ def plot_results(samples: dict, ci: int = 95, Y: bool = False,
                    fontsize=label_size)
         plt.ylabel("Active cases ($\mathbf{log_{10}}$)", 
                    fontsize=label_size)
-        plt.xticks(dates[np.arange(t0, tf, 20)])
+        plt.xticks(dates[range(t0, tf, 20)])
         plt.tick_params(axis='x', labelsize=tick_size)
         plt.tick_params(axis='y', labelsize=tick_size)
         plt.title(f"Active cases {samples['country']}", 
