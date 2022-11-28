@@ -6,32 +6,34 @@ import pyjags as pj
 import arviz as az
 from datetime import datetime as dt
 import pandas as pd
+from dataclasses import dataclass
+from typing import List
 
 
+@dataclass
 class Analysis:
-
-    def __init__(self, date, confirmed, recovered_death, confinement, last_data,
-                 last_projection, peak, beta, rmu, q, p, tauI, tauX):
-        self.date = date
-        self.confirmed = confirmed
-        self.recovered_death = recovered_death
-        self.confinement = confinement
-        self.last_data = last_data
-        self.last_projection = last_projection
-        self.peak = peak
-        self.beta = beta
-        self.rmu = rmu
-        self.q = q
-        self.p = p
-        self.tauI = tauI
-        self.tauX = tauX
-        self.varname = np.array(['beta', 'rmu', 'p', 'q', 'tauX', 'tauI'])
-        self.names = np.array([r'$ \mathbf{\beta} $',
-                               r'$ \mathbf{r + \mu} $',
-                               '$ \mathbf{p} $',
-                               '$ \mathbf{q} $', 
-                               r'$ \mathbf{\sigma_{X}} $',
-                               r'$ \mathbf{\sigma_{I}} $'])
+    date: str
+    confirmed: float
+    recovered_death: float
+    confinement: str
+    last_data: str
+    last_projection: str
+    peak: str
+    beta: List[int]  # check if integer type is needed 
+    rmu: List[int]   # check if integer type is needed 
+    q: List[int]     # check if integer type is needed 
+    p: List[int]     # check if integer type is needed 
+    tauI: List[float] 
+    tauX: List[float]
+    varname: np.ndarray[str] = np.array(
+        ['beta', 'rmu', 'p', 'q', 'tauX', 'tauI'])
+    names: np.ndarray[str] = np.array(
+        [r'$ \mathbf{\beta} $',
+        r'$ \mathbf{r + \mu} $',
+        '$ \mathbf{p} $',
+        '$ \mathbf{q} $', 
+        r'$ \mathbf{\sigma_{X}} $',
+        r'$ \mathbf{\sigma_{I}} $'])   
 
     def data_processing(self) -> None:
         # Active cases in logarithmic scale
@@ -61,12 +63,12 @@ class Analysis:
         Iq = I[tq]  # First datum after confinement in the Active cases series
 
         # return time+1 because in JAGS arrays are indexed from 1
-        self.data = dict(b0=self.beta[0], b1=self.beta[1], r0=self.rmu[0], 
-                         r1=self.rmu[1], q0=self.q[0], q1=self.q[1], 
-                         p0=self.p[0], p1=self.p[1], tauI0=self.tauI[0], 
-                         tauI1=self.tauI[1], tauX0=self.tauX[0], 
-                         tauX1=self.tauX[1], I=I, X=X, I0=I0, Iq=Iq, t0=t0 + 1, 
-                         tX0=tX0 + 1, tq=tq + 1, tmax=tmax + 1, tf=tf + 1)       
+        self.data = dict(b0=self.beta[0], b1=self.beta[1], r0=self.rmu[0],
+                         r1=self.rmu[1], q0=self.q[0], q1=self.q[1],
+                         p0=self.p[0], p1=self.p[1], tauI0=self.tauI[0],
+                         tauI1=self.tauI[1], tauX0=self.tauX[0],
+                         tauX1=self.tauX[1], I=I, X=X, I0=I0, Iq=Iq, t0=t0 + 1,
+                         tX0=tX0 + 1, tq=tq + 1, tmax=tmax + 1, tf=tf + 1)
 
     def sampler(self, nchains: int, nthreads: int, nchains_per_thread: int = 1, 
                 niter: int = 10000, nadapt: int = 0, thin: int=1, 
