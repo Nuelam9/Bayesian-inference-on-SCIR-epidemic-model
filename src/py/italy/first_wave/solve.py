@@ -10,44 +10,35 @@ sys.path.append('../../../modules/')
 from utils import get_data, SCIR
 from multiprocessing import Pool, cpu_count
 from scipy.integrate import odeint
-from typing import Tuple, Callable
+from typing import Tuple
+from dataclasses import dataclass
 import glob 
 
 
+@dataclass
 class Ode_system_solver:
-
-
-        def __init__(self, N: float, t0: int, tq: int, tf: int, 
-                     I0: float, X0: float, var: str) -> None:
-                self.N = N
-                self.t0 = t0
-                self.tq = tq
-                self.tf = tf
-                self.I0 = I0
-                self.X0 = X0
-                self.var = var
-                if var == 'S':
-                        self.ind = 0
-                elif var == 'C':
-                        self.ind = 1
-                elif var == 'I':
-                        self.ind = 2
-                elif var == 'X':
-                        self.ind = 3
-        
+        N: float
+        t0: int
+        tq: int
+        tf: int
+        I0: float
+        X0: float
+        var: str    
 
         def solve_SCIR(self, param: tuple, step: float = 0.01) -> np.ndarray:
                 beta, rmu, p, q = param
                 # Initial conditions for the first regime
-                N, t0, tq, tf, I0, X0, ind = (
-                                         self.N, 
-                                         self.t0, 
-                                         self.tq,
-                                         self.tf,
-                                         self.I0,
-                                         self.X0,
-                                         self.ind
-                                        )
+                N, t0, tq, tf, I0, X0= (
+                        self.N,
+                        self.t0,
+                        self.tq,
+                        self.tf,
+                        self.I0,
+                        self.X0)
+                
+                indices = {"S": 0, "C": 1, "I": 2, 'X': 3}
+                ind = indices[self.var]
+                
                 S0 = N - I0 - X0
                 C0 = 0.
                 state0 = np.array([S0, C0, I0, X0])
@@ -94,10 +85,10 @@ if __name__ == '__main__':
         param = samples['beta'].flat, samples['rmu'].flat, \
                 samples['p'].flat, samples['q'].flat
 
-        parameters = [(a, b, c, d) for a, b, c, d in zip(*param)]
+        parameters = list(zip(*param))
         p = Pool(cpu_count())
         res = p.map(solver_ist.solve_SCIR, parameters)
         p.close()
 
         res = np.asarray(res).T
-        np.save(res_path + f'sol_{solver_ist.var}_.npy', res)
+        np.save(f'{res_path}sol_{solver_ist.var}_.npy', res)
