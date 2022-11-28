@@ -1,9 +1,9 @@
 import sys
 import pandas as pd
+import numpy as np
 sys.path.append('../../../modules/')
 from analysis import Analysis
 from time import time
-import pickle
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -18,22 +18,22 @@ else:
     burn_in = float(sys.argv[4])
 
     # get data to fit
-    df = pd.read_csv('../../../Data/dataset_ita.csv')
+    df = pd.read_csv('../../../Data/dataset_esp.csv')
 
     # instantiating an analysis object
-    analysis = Analysis(date=df['Day'],
-                            confirmed=df['Active_cases_smooth'].to_numpy(),
-                            recovered_death=df['Recovered_Death_smooth'].to_numpy(),
-                            confinement='2020.03.09',
-                            last_data='2020.04.01',
-                            last_projection='2020.05.17',
-                            peak='2020.04.23',
-                            beta=[0,1],
-                            rmu=[0,1],
-                            q=[0,5],
-                            p=[0,5],
-                            tauI=[0.01, 0.01],
-                            tauX=[0.01, 0.01])
+    analysis = Analysis(date=df['Day'].to_numpy(),
+                        confirmed=df['Active_cases'].to_numpy(),
+                        recovered_death=df['Recovered_Death'].to_numpy(),
+                        confinement='2020.03.09',
+                        last_data='2020.04.18',
+                        last_projection='2020.05.17',
+                        peak='2020.04.18',
+                        beta=[0,1],
+                        rmu=[0,1],
+                        q=[0,5],
+                        p=[0,5],
+                        tauI=[0.01, 0.01],
+                        tauX=[0.01, 0.01])
 
     # call sampler analysis' method
     analysis.sampler(nchains=nchains, nthreads=nthreads, niter=niter, burn_in=burn_in)
@@ -45,7 +45,7 @@ else:
             'burn_in': analysis.burn_in,
             'varname': analysis.varname,
             'names': analysis.names,
-            'country': 'Italy' }
+            'country': 'Spain' }
 
 
     print('\n')
@@ -56,8 +56,8 @@ else:
     t1 = time()
     # Save dictionary to file
     import pickle
-    filepath = "../../../Results/ita/first_wave/simul_res/"
-    filename = f"results_before_peak_ita_{niter}.pkl"
-    with open(filepath + filename, 'wb') as file:
+    filepath = "../../../Results/esp/first_wave/"
+    filename = "results_after_peak_esp_{niter}.pkl"
+    with open(filepath, 'wb') as file:
         pickle.dump(results, file)
     print(f'{time() - t1:.4f}s')

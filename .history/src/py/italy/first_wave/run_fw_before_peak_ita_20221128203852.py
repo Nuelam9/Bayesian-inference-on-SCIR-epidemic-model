@@ -56,8 +56,9 @@ else:
     t1 = time()
     # Save dictionary to file
     import pickle
-    filepath = "../../../Results/ita/first_wave/simul_res/"
-    filename = f"results_before_peak_ita_{niter}.pkl"
-    with open(filepath + filename, 'wb') as file:
+       filepath = "../../../Results/ita/first_wave/"
+    filename = f"results_after_peak_ita_{niter}.pkl"
+    with open(('../../../Results/ita/first_wave/simul_res/' + 'results_before_peak_ita_{niter}.pkl'), 'wb') as file:
         pickle.dump(results, file)
     print(f'{time() - t1:.4f}s')
+

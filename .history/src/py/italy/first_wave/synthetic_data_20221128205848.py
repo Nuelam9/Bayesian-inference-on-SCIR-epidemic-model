@@ -2,8 +2,9 @@ import sys
 import pandas as pd
 sys.path.append('../../../modules/')
 from analysis import Analysis
-from time import time
+from utils import *
 import pickle
+from time import time
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -17,23 +18,31 @@ else:
     niter = int(sys.argv[3])
     burn_in = float(sys.argv[4])
 
-    # get data to fit
+    # get data with time
     df = pd.read_csv('../../../Data/dataset_ita.csv')
+
+    # get the dictonary containing all parameters values
+    filehandler = open('../../../Results/ita/first_wave/results_before_peak_ita_200000.pkl', 'rb')
+    res = pickle.load(filehandler)
+    # numeric solutino of SCIR system with median of parameters fitted 
+    t, *states = solve_SCIR(res)
+    # get the synthetic data for Active cases and new Death+Recovered 
+    I, X = states[2][::100], states[3][::100]
 
     # instantiating an analysis object
     analysis = Analysis(date=df['Day'],
-                            confirmed=df['Active_cases_smooth'].to_numpy(),
-                            recovered_death=df['Recovered_Death_smooth'].to_numpy(),
-                            confinement='2020.03.09',
-                            last_data='2020.04.01',
-                            last_projection='2020.05.17',
-                            peak='2020.04.23',
-                            beta=[0,1],
-                            rmu=[0,1],
-                            q=[0,5],
-                            p=[0,5],
-                            tauI=[0.01, 0.01],
-                            tauX=[0.01, 0.01])
+                        confirmed=I,
+                        recovered_death=X,
+                        confinement='2020.03.09',
+                        last_data='2020.04.23',   # motivate choice
+                        last_projection='2020.07.23',
+                        peak='2020.04.23',
+                        beta=[0,1],
+                        rmu=[0,1],
+                        q=[0,5],
+                        p=[0,5],
+                        tauI=[0.01, 0.01],
+                        tauX=[0.01, 0.01])
 
     # call sampler analysis' method
     analysis.sampler(nchains=nchains, nthreads=nthreads, niter=niter, burn_in=burn_in)
@@ -55,9 +64,13 @@ else:
     print("\nSaving simulation's results...")
     t1 = time()
     # Save dictionary to file
-    import pickle
-    filepath = "../../../Results/ita/first_wave/simul_res/"
-    filename = f"results_before_peak_ita_{niter}.pkl"
-    with open(filepath + filename, 'wb') as file:
-        pickle.dump(results, file)
+    filepath = "../../../Results/ita/first_wave/"
+    filename = f"results_after_peak_esp_{niter}.pkl"
+    file = open('results_synthetic_ita.pkl', 'wb')
+    pickle.dump(results, file)
+    file.close()
     print(f'{time() - t1:.4f}s')
+
+
+
+
