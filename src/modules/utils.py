@@ -124,12 +124,11 @@ def infected_exact(samples: dict) -> np.array:
 
 
 def get_data(file: str) -> dict:
-        """
+    """
         Load data from .pkl file and extract only useful data
         """
-        file_handler = open(file, 'rb')
-        samples = pickle.load(file_handler)
-        return samples    
+    file_handler = open(file, 'rb')
+    return pickle.load(file_handler)    
 
 
 # The SCIR model differential equations
