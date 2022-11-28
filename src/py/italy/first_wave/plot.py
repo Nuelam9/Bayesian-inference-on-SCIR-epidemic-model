@@ -8,16 +8,19 @@ import sys
 sys.path.append('../../../modules/')
 from utils import get_data
 import matplotlib.pyplot as plt
+from typing import Dict
+from dataclasses import dataclass
 
 
+datatimeIndex_type = pd.core.indexes.datetimes.DatetimeIndex
+
+@dataclass
 class Plot_solutions:
-
-    def __init__(self, samples):
-        self.samples = samples
+    samples: Dict
 
     def sol_plot(self, file_path: str, plot_path: str, lin: bool,
-                 dates: pd.core.indexes.datetimes.DatetimeIndex,
-                 sol_dates: pd.core.indexes.datetimes.DatetimeIndex) -> None:
+                 dates: datatimeIndex_type,
+                 sol_dates: datatimeIndex_type) -> None:
         
         sol = np.load(file_path) # [:, :10]
         var = file_path.split('_')[-2]
@@ -37,7 +40,7 @@ class Plot_solutions:
                 obs = np.exp(samples[var][:tf])
                 plt.scatter(dates[:tf], obs, c='r', label='Observed data')
                 plt.legend()   
-            
+
         ci = 95.
         sol1 = np.percentile(sol, (100. + ci) / 2., axis=1)
         sol2 = np.percentile(sol, (100. - ci) / 2., axis=1)
@@ -48,7 +51,7 @@ class Plot_solutions:
         plt.xticks(sol_dates[np.arange(t0, tf * 100 , 20*100)])
         plt.ylabel(f'${var}(t)$', fontsize=14, weight='bold')
         plt.grid()
-        plt.savefig(plot_path + f'plot_{mode}_{var}.png', dpi=400)#transparent=True, dpi=400)
+        plt.savefig(f'{plot_path}plot_{mode}_{var}.png', dpi=400)
         # plt.show()
         plt.clf()
         plt.close()
@@ -56,8 +59,8 @@ class Plot_solutions:
 
 if __name__ == '__main__':
     path = '../../../Results/ita/first_wave/'
-    simul_path = path + 'simul_res/'
-    sol_path = path + 'solve_res/'
+    simul_path = f'{path}simul_res/'
+    sol_path = f'{path}solve_res/'
 
     tick_size: int = 10
 
@@ -77,8 +80,5 @@ if __name__ == '__main__':
 
     for lin in [True, False]:
         for file in files:
-            plot_sol.sol_plot(sol_path + file, 
-                              path + 'plot/ode_sol/',
-                              lin,
-                              dates, 
-                              sol_dates)
+            plot_sol.sol_plot(
+                sol_path + file, f'{path}plot/ode_sol/', lin, dates, sol_dates)
