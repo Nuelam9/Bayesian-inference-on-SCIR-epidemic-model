@@ -349,21 +349,8 @@ def trace_plot(samples: dict, var: str, total: bool = True,
     ind = np.where(samples['varname'] == var)[0][0]
     samples_size = int(samples['niter'] * samples['burn_in'])
     if not total:
-        for i in range(samples['nchains']):
-            plt.plot(samples[var][0, :, i], lw=1, label=f"Chain {i + 1}")
-        plt.plot([np.median(samples[var])] * samples_size, 
-                  c='r', lw=2, label='Median')
-        plt.grid()
-        plt.legend()
-        ax = plt.gca()
-        # removing top and right borders
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.spines['left'].set_visible(False)
-        ax.spines['bottom'].set_visible(False)
-        plt.xlabel('MCMC step')
-        plt.title(f"Trace of {samples['names'][ind]}", weight='bold')
-        # Trace plot of one parameter
+        _extracted_from_trace_plot_6(samples, var, samples_size, ind)
+            # Trace plot of one parameter
     else:
         # this is for bigger PC
         if samples['nchains'] == 12:
@@ -382,11 +369,7 @@ def trace_plot(samples: dict, var: str, total: bool = True,
             ax.plot(samples[var][0, :, i], c='b', lw=1)
             ax.plot([np.median(samples[var])] * samples_size, c='r', lw=1)
             ax.grid()
-            # removing top and right borders
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            ax.spines['left'].set_visible(False)
-            ax.spines['bottom'].set_visible(False)
+            _extracted_from_trace_plot_14(ax)
             ax.set_xlabel('MCMC step')
             ax.tick_params(axis='x', which='major', labelsize=8.5)
             ax.set_title(f"Chain {(i + 1):d}", fontweight='bold')
@@ -394,54 +377,82 @@ def trace_plot(samples: dict, var: str, total: bool = True,
                      fontsize=title_size, fontweight='bold')
         plt.show()
 
+
+# TODO Rename this here and in `trace_plot`
+def _extracted_from_trace_plot_6(samples, var, samples_size, ind):
+    for i in range(samples['nchains']):
+        plt.plot(samples[var][0, :, i], lw=1, label=f"Chain {i + 1}")
+    plt.plot([np.median(samples[var])] * samples_size, 
+              c='r', lw=2, label='Median')
+    plt.grid()
+    plt.legend()
+    ax = plt.gca()
+    _extracted_from_trace_plot_14(ax)
+    plt.xlabel('MCMC step')
+    plt.title(f"Trace of {samples['names'][ind]}", weight='bold')
+
+
+# TODO Rename this here and in `trace_plot`
+def _extracted_from_trace_plot_14(ax):
+    # removing top and right borders
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
+
     
 def posteriors(samples: dict, var: str, total: bool = True) -> None:
     ind = np.where(samples['varname'] == var)[0][0]
-    exp = 1
-    if (var == 'tauX') | (var == 'tauI'):
-        exp = - 1 / 2
+    exp = - 1 / 2 if (var == 'tauX') | (var == 'tauI') else 1
+    _extracted_from_posteriors_(samples, var, exp, ind)
 
-    if not total:
-        for i in range(samples['nchains']): 
-            sns.distplot((np.power(samples[var][0, :, i], exp)), 
-                         hist=False, kde=True, label=f"Chain {i + 1}")
-        plt.grid()
-        plt.legend()
-        ax = plt.gca()
-        # removing top and right borders
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.spines['left'].set_visible(False)
-        ax.spines['bottom'].set_visible(False)
-        ax.set_title(f"Posterior of all chains for {samples['names'][ind]}",
-                     weight='bold')
-    else:
-        if samples['nchains'] == 12:
-            rows, cols = 4, 3
-        elif samples['nchains'] == 10:
-            rows, cols = 5, 2
-        elif samples['nchains'] == 8:
-            rows, cols = 4, 2
 
-        fig, axs = plt.subplots(rows, cols, figsize=(16, 8),
-                                constrained_layout=True)
-        axs = trim_axs(axs)
+# TODO Rename this here and in `posteriors`
+def _extracted_from_posteriors_(samples, var, exp, ind):
+    if samples['nchains'] == 12:
+        rows, cols = 4, 3
+    elif samples['nchains'] == 10:
+        rows, cols = 5, 2
+    elif samples['nchains'] == 8:
+        rows, cols = 4, 2
 
-        for ax, i in zip(axs, range(samples['nchains'])):
-            sns.histplot((np.power(samples[var][0, :, i], exp)), 
-                         kde=True, stat='density', color='b', ax=ax)
-            ax.tick_params(axis='x', which='major', labelsize=7.5)
-            ax.grid()
-            # removing top and right borders
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            ax.spines['left'].set_visible(False)
-            ax.spines['bottom'].set_visible(False)
-            ax.set_title(f'Chain {i + 1}', weight='bold')
+    fig, axs = plt.subplots(rows, cols, figsize=(16, 8),
+                            constrained_layout=True)
+    axs = trim_axs(axs)
 
-        fig.suptitle(f"Posterior distributions of {samples['names'][ind]}", 
-                     fontsize=16, fontweight='bold')
-        plt.show()
+    for ax, i in zip(axs, range(samples['nchains'])):
+        sns.histplot((np.power(samples[var][0, :, i], exp)), 
+                     kde=True, stat='density', color='b', ax=ax)
+        ax.tick_params(axis='x', which='major', labelsize=7.5)
+        ax.grid()
+        _extracted_from_posteriors_(ax)
+        ax.set_title(f'Chain {i + 1}', weight='bold')
+
+    fig.suptitle(f"Posterior distributions of {samples['names'][ind]}", 
+                 fontsize=16, fontweight='bold')
+    plt.show()
+
+
+# TODO Rename this here and in `posteriors`
+def _extracted_from_posteriors_(samples, var, exp, ind):
+    for i in range(samples['nchains']): 
+        sns.distplot((np.power(samples[var][0, :, i], exp)), 
+                     hist=False, kde=True, label=f"Chain {i + 1}")
+    plt.grid()
+    plt.legend()
+    ax = plt.gca()
+    _extracted_from_posteriors_(ax)
+    ax.set_title(f"Posterior of all chains for {samples['names'][ind]}",
+                 weight='bold')
+
+
+# TODO Rename this here and in `posteriors`
+def _extracted_from_posteriors_(ax):
+    # removing top and right borders
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_visible(False)
+    ax.spines['bottom'].set_visible(False)
 
 
 def plot_summary(samples: dict, without_acf: bool = True, label_size: int = 14, 
@@ -462,11 +473,7 @@ def plot_summary(samples: dict, without_acf: bool = True, label_size: int = 14,
                 ax[i, 0].plot(var_chain, label=f'Chain {j + 1}', lw=1)
                 sns.distplot(var_chain, hist=False, kde=True, ax=ax[i, 1])
 
-            ax[i, 0].plot([np.median(var_chains)] * samples_size, 
-                          c='r', lw=2, label='Median')
-            ax[i, 1].axvline(np.median(var_chains), color='r', 
-                             lw=1, label='Actual epidemic peak')
-            ax[i, 1].set_ylabel('')
+            _extracted_from_plot_summary_19(ax, i, var_chains, samples_size)
             titles = [f"Trace of {samples['names'][i]}",
                       f"Posterior distribution of {samples['names'][i]}"]
             for k in range(2):
@@ -475,7 +482,6 @@ def plot_summary(samples: dict, without_acf: bool = True, label_size: int = 14,
                 ax[i, k].tick_params(axis='y', labelsize=tick_size)
                 ax[i, k].grid()
         ax[-1, 0].set_xlabel('MCMC step', fontsize=label_size)
-    # Plot of trace, posterior, acf, for all parameters and chains
     else:
         _, ax = plt.subplots(6, 3, figsize=(15, 12), constrained_layout=True)
         samples_size = int(samples['niter'] * samples['burn_in'])
@@ -492,11 +498,7 @@ def plot_summary(samples: dict, without_acf: bool = True, label_size: int = 14,
                 sns.distplot(var_chain, hist=False, kde=True, ax=ax[i, 1])
                 ax[i, 2].plot(acf(var_chain, fft=True, nlags=100))
 
-            ax[i, 0].plot([np.median(var_chains)] * samples_size, 
-                          c='r', lw=2, label='Median')
-            ax[i, 1].axvline(np.median(var_chains), color='r', 
-                             lw=1, label='Actual epidemic peak')
-            ax[i, 1].set_ylabel('')
+            _extracted_from_plot_summary_19(ax, i, var_chains, samples_size)
             ax[i, 2].set_xlabel('Lag')
             titles = [f"Trace of {samples['names'][i]}", 
                       f"Posterior distribution of {samples['names'][i]}",
@@ -506,3 +508,12 @@ def plot_summary(samples: dict, without_acf: bool = True, label_size: int = 14,
                 ax[i, k].set_xlabel('MCMC step')
                 ax[i, k].set_title(titles[k], weight='bold')
                 ax[i, k].grid()        
+
+
+# TODO Rename this here and in `plot_summary`
+def _extracted_from_plot_summary_19(ax, i, var_chains, samples_size):
+    ax[i, 0].plot([np.median(var_chains)] * samples_size, 
+                  c='r', lw=2, label='Median')
+    ax[i, 1].axvline(np.median(var_chains), color='r', 
+                     lw=1, label='Actual epidemic peak')
+    ax[i, 1].set_ylabel('')        
