@@ -4,6 +4,7 @@ import numpy as np
 sys.path.append('../../../modules/')
 from analysis import Analysis
 from time import time
+import pickle
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -56,9 +57,8 @@ else:
         'names': analysis.names,
         'country': 'France' }
 
-    # Save dictionary to file
-    import pickle
-    file = open('../../../Results/fra/first_wave/results_after_peak_fra.pkl', 'wb')
-    pickle.dump(results, file)
-    file.close()
+    filepath = "../../../Results/fra/first_wave/"
+    filename = "results_after_peak_fra.pkl"
+    with open(filepath + filename, 'wb') as file:
+        pickle.dump(results, file)
     print(f'{time() - t1:.4f}s')

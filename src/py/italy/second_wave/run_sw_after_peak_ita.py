@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 sys.path.append('../../../modules/')
 from analysis import Analysis
+import pickle
 from time import time
 import warnings
 warnings.filterwarnings('ignore')
@@ -48,16 +49,14 @@ else:
             'names': analysis.names,
             'country': 'Italy' }
 
-
     print('\n')
     print('Summary:')
     print(analysis.summary)
 
     print("\nSaving simulation's results...")
     t1 = time()
-    # Save dictionary to file
-    import pickle
-    file = open('../../../Results/ita/second_wave/results_after_peak_ita.pkl', 'wb')
-    pickle.dump(results, file)
-    file.close()
+    filepath = "../../../Results/ita/second_wave/"
+    filename = "results_after_peak_ita.pkl"
+    with open(filepath + filename, 'wb') as file:
+        pickle.dump(results, file)
     print(f'{time() - t1:.4f}s')

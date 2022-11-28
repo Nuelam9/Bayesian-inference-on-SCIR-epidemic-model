@@ -4,6 +4,7 @@ import numpy as np
 sys.path.append('../../../modules/')
 from analysis import Analysis
 from time import time
+import pickle
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -57,10 +58,10 @@ else:
     print("\nSaving simulation's results...")
     t1 = time()
     # Save dictionary to file
-    import pickle
-    file = open(f'../../../Results/esp/first_wave/results_before_peak_esp_{niter}_{thin}.pkl', 'wb')
-    pickle.dump(results, file)
-    file.close()
+    filepath = "../../../Results/esp/first_wave/"
+    filename = f"results_before_peak_esp_{niter}.pkl"
+    with open(filepath + filename, 'wb') as file:
+        pickle.dump(results, file)
     print(f'{time() - t1:.4f}s')
 
 # chains = analysis_esp.nchains

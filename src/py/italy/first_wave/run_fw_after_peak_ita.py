@@ -1,8 +1,8 @@
 import sys
 import pandas as pd
-import numpy as np
 sys.path.append('../../../modules/')
 from analysis import Analysis
+import pickle
 from time import time
 import warnings
 warnings.filterwarnings('ignore')
@@ -55,8 +55,8 @@ else:
     print("\nSaving simulation's results...")
     t1 = time()
     # Save dictionary to file
-    import pickle
-    file = open(f'../../../Results/ita/first_wave/results_after_peak_ita_{niter}.pkl', 'wb')
-    pickle.dump(results, file)
-    file.close()
+    filepath = "../../../Results/ita/first_wave/"
+    filename = f"results_after_peak_ita_{niter}.pkl"
+    with open(filepath + filename, 'wb') as file:
+        pickle.dump(results, file)
     print(f'{time() - t1:.4f}s')

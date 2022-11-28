@@ -56,7 +56,6 @@ else:
             'names': analysis.names,
             'country': 'Italy' }
 
-
     print('\n')
     print('Summary:')
     print(analysis.summary)
@@ -64,11 +63,8 @@ else:
     print("\nSaving simulation's results...")
     t1 = time()
     # Save dictionary to file
-    file = open('../../../Results/ita/first_wave/results_synthetic_ita.pkl', 'wb')
-    pickle.dump(results, file)
-    file.close()
+    filepath = "../../../Results/ita/first_wave/"
+    filename = "results_synthetic_ita.pkl"
+    with open(filepath + filename, 'wb') as file:
+        pickle.dump(results, file)
     print(f'{time() - t1:.4f}s')
-
-
-
-

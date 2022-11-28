@@ -47,7 +47,6 @@ else:
             'names': analysis.names,
             'country': 'Italy' }
 
-
     print('\n')
     print('Summary:')
     print(analysis.summary)
@@ -56,8 +55,8 @@ else:
     t1 = time()
     # Save dictionary to file
     import pickle
-    file = open('../../../Results/ita/second_wave/results_before_peak_ita.pkl', 'wb')
-    pickle.dump(results, file)
-    file.close()
+    filepath = "../../../Results/ita/second_wave/"
+    filename = "results_before_peak_ita.pkl"
+    with open(filepath + filename, 'wb') as file:
+        pickle.dump(results, file)
     print(f'{time() - t1:.4f}s')
-
