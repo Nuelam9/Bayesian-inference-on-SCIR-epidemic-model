@@ -48,7 +48,7 @@ def peak_posterior_nb(result: float, beta: float,
 
 @jit('void(double[:], double[:,:], double, double)',
       nopython=True, nogil=True)
-def epidemic_end(times: np.array, I:np.ndarray, threshold: float, tmax: float):
+def epidemic_end(times: np.array, I: np.ndarray, threshold: float, tmax: float):
     """
     Function under test.
     """
@@ -191,6 +191,7 @@ def solve_SCIR(samples: dict, step: float = 0.01,
                   args=(N, beta, q, p, rmu))
     ret = np.concatenate((ret1, ret2))
     return np.column_stack((t, ret)).T
+
 
 def time_check(func, n):
     t = Timer(lambda: func)
